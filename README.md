@@ -7,47 +7,143 @@
 <a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
 </p>
 
-## About Laravel
+## Acerca de la Aplicación
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+**Tareas y Noticias** es una aplicación web desarrollada con Laravel 13 que permite la gestión de tareas y noticias con un sistema completo de roles y permisos.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+### Características principales
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+- **Gestión de Tareas**: Crear, editar, visualizar y eliminar tareas con seguimiento de estado
+- **Gestión de Noticias**: Publicar y gestionar noticias en la plataforma
+- **Sistema de Roles y Permisos**: Control granular de acceso basado en roles (Admin, Editor, Viewer)
+- **Panel de Administración**: Interfaz administrativa con Filament v5
+- **Excepciones de Permisos**: Permitir excepciones individuales a permisos por rol
+- **Perfil de Usuario**: Cada usuario puede editar su perfil personal
+- **Notificaciones**: Sistema de notificaciones en base de datos
 
-## Learning Laravel
+## Requisitos del Sistema
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+- **PHP 8.4** (requerido)
+- **Composer** (para gestión de dependencias)
+- **Node.js** (para compilar assets con Vite)
+- **SQLite** o **MySQL** (recomendado para producción)
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## Instalación
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
-
-## Agentic Development
-
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+### 1. Clonar el repositorio
 
 ```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+git clone <tu-repositorio>
+cd Tareas
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+### 2. Instalar dependencias de PHP
 
-## Contributing
+```bash
+composer install
+```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+### 3. Configurar el archivo de entorno
 
-## Code of Conduct
+```bash
+cp .env.example .env
+```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+Edita el archivo `.env` y configura tu base de datos:
+
+```env
+DB_CONNECTION=sqlite
+# O para MySQL:
+# DB_CONNECTION=mysql
+# DB_HOST=127.0.0.1
+# DB_PORT=3306
+# DB_DATABASE=tareas
+# DB_USERNAME=root
+# DB_PASSWORD=
+```
+
+### 4. Generar clave de aplicación
+
+```bash
+php artisan key:generate
+```
+
+### 5. Ejecutar migraciones
+
+```bash
+php artisan migrate
+```
+
+### 6. Ejecutar seeders (opcional pero recomendado)
+
+```bash
+php artisan db:seed
+```
+
+Esto creará usuarios de prueba:
+- **Admin**: admin@test.com / password
+- **Editor**: editor@test.com / password
+- **Viewer**: viewer@test.com / password
+
+### 7. Instalar dependencias de Node.js
+
+```bash
+npm install
+```
+
+### 8. Compilar assets
+
+Para desarrollo:
+```bash
+npm run dev
+```
+
+Para producción:
+```bash
+npm run build
+```
+
+### 9. Iniciar el servidor
+
+```bash
+php artisan serve
+```
+
+La aplicación estará disponible en `http://localhost:8000`
+
+Panel administrativo: `http://localhost:8000/admin`
+
+## Sistema de Roles y Permisos
+
+### Roles disponibles
+
+- **Admin**: Acceso total a todas las funcionalidades
+- **Editor**: Puede ver y editar tareas y noticias, pero no eliminar
+- **Viewer**: Solo lectura de tareas y noticias
+
+### Recursos protegidos
+
+- **Tareas**: Acceso según rol asignado
+- **Noticias**: Acceso según rol asignado
+- **Usuarios**: Solo administradores pueden ver y gestionar usuarios
+- **Roles, Permisos y Excepciones**: Solo administradores
+
+### Perfil Personal
+
+Todos los usuarios pueden editar su perfil personal desde la opción "Mi Perfil" en el menú de administración.
+
+## Información adicional
+
+Para más detalles sobre el sistema de permisos, consulta la documentación en [PERMISOS.md](./PERMISOS.md).
+
+## Versiones de dependencias principales
+
+- Laravel Framework: v13
+- Filament: v5
+- Livewire: v4
+- Tailwind CSS: v4
+- Pest: v4
+- PHP: 8.4
 
 ## Security Vulnerabilities
 
