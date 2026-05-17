@@ -11,6 +11,7 @@ use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
+use Livewire\Attributes\Modelable;
 
 class EditProfile extends Page implements HasForms
 {
@@ -22,18 +23,21 @@ class EditProfile extends Page implements HasForms
 
     protected static ?int $navigationSort = 999;
 
+    #[Modelable]
     public ?array $data = [];
 
     public function mount(): void
     {
         $user = auth()->user();
 
-        $this->form->fill([
-            'name' => $user?->name ?? '',
-            'email' => $user?->email ?? '',
-            'fecha_nacimiento' => $user?->fecha_nacimiento,
-            'foto_perfil' => $user?->foto_perfil ?? null,
-        ]);
+        if ($user) {
+            $this->form->fill([
+                'name' => $user->name,
+                'email' => $user->email,
+                'fecha_nacimiento' => $user->fecha_nacimiento,
+                'foto_perfil' => $user->foto_perfil,
+            ]);
+        }
     }
 
     protected function getFormSchema(): array

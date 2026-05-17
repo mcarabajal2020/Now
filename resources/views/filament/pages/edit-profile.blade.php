@@ -1,11 +1,11 @@
 <x-filament-panels::page>
-    <x-filament-panels::form wire:submit.prevent="save">
+    <form wire:submit="save" class="space-y-6">
         {{ $this->form }}
 
-        <x-filament-panels::form.actions>
-            <x-filament-panels::form.actions.submit>
+        <div class="flex justify-end">
+            <x-filament::button type="submit">
                 Guardar cambios
-            </x-filament-panels::form.actions.submit>
-        </x-filament-panels::form.actions>
-    </x-filament-panels::form>
+            </x-filament::button>
+        </div>
+    </form>
 </x-filament-panels::page>
