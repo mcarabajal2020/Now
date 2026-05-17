@@ -48,7 +48,7 @@ return new class extends Migration
             )
             SQL);
 
-        DB::statement(<<<SQL
+        DB::statement(<<<'SQL'
             INSERT INTO "tasks_new" (
                 "id",
                 "titulo",

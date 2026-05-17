@@ -2,13 +2,14 @@
 
 namespace App\Models;
 
+use Database\Factories\NoticiaFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Noticia extends Model
 {
-    /** @use HasFactory<\Database\Factories\NoticiaFactory> */
+    /** @use HasFactory<NoticiaFactory> */
     use HasFactory;
 
     protected $fillable = [

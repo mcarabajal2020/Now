@@ -2,8 +2,6 @@
 
 namespace App\Filament\Traits;
 
-use Illuminate\Database\Eloquent\Model;
-
 trait AuthorizedResource
 {
     /**

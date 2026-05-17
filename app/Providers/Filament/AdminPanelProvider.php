@@ -2,6 +2,8 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\Widgets\FinishedTasksLast7DaysWidget;
+use App\Filament\Widgets\OpenTasksWidget;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -40,10 +42,10 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')
             ->widgets([
-                //AccountWidget::class,
-                //FilamentInfoWidget::class,
-                \App\Filament\Widgets\OpenTasksWidget::class,
-                \App\Filament\Widgets\FinishedTasksLast7DaysWidget::class,
+                // AccountWidget::class,
+                // FilamentInfoWidget::class,
+                OpenTasksWidget::class,
+                FinishedTasksLast7DaysWidget::class,
             ])
             ->middleware([
                 EncryptCookies::class,

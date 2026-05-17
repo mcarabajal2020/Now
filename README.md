@@ -1,11 +1,4 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
 
 ## Acerca de la Aplicación
 
@@ -33,7 +26,7 @@
 ### 1. Clonar el repositorio
 
 ```bash
-git clone <tu-repositorio>
+git clone https://github.com/mcarabajal2020/Now
 cd Tareas
 ```
 
@@ -106,44 +99,20 @@ npm run build
 ### 9. Iniciar el servidor
 
 ```bash
-php artisan serve
+composer require laravel/boost --dev
+
+php artisan boost:install
 ```
 
-La aplicación estará disponible en `http://localhost:8000`
+Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
 
-Panel administrativo: `http://localhost:8000/admin`
+## Contributing
 
-## Sistema de Roles y Permisos
+Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
 
-### Roles disponibles
+## Code of Conduct
 
-- **Admin**: Acceso total a todas las funcionalidades
-- **Editor**: Puede ver y editar tareas y noticias, pero no eliminar
-- **Viewer**: Solo lectura de tareas y noticias
-
-### Recursos protegidos
-
-- **Tareas**: Acceso según rol asignado
-- **Noticias**: Acceso según rol asignado
-- **Usuarios**: Solo administradores pueden ver y gestionar usuarios
-- **Roles, Permisos y Excepciones**: Solo administradores
-
-### Perfil Personal
-
-Todos los usuarios pueden editar su perfil personal desde la opción "Mi Perfil" en el menú de administración.
-
-## Información adicional
-
-Para más detalles sobre el sistema de permisos, consulta la documentación en [PERMISOS.md](./PERMISOS.md).
-
-## Versiones de dependencias principales
-
-- Laravel Framework: v13
-- Filament: v5
-- Livewire: v4
-- Tailwind CSS: v4
-- Pest: v4
-- PHP: 8.4
+In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
 
 ## Security Vulnerabilities
 

@@ -21,7 +21,6 @@ class CreateTask extends CreateRecord
             abort(403);
         }
 
-
         $data['usuario_solicita_id'] = $user->id;
         $data['fecha_creacion'] = $data['fecha_creacion'] ?? now();
 
@@ -29,8 +28,6 @@ class CreateTask extends CreateRecord
         // En el formulario de CREATE el campo `estado` está oculto, así que debemos setearlo aquí.
         $data['estado'] = 'Nuevo';
         $data['fecha_finalizacion'] = null;
-
-
 
         return $data;
     }

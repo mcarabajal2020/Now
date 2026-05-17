@@ -4,13 +4,12 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\UserPermissionResource\Pages;
 use App\Models\UserPermission;
-use Filament\Forms\Components\Select;
-use Filament\Resources\Resource;
-use Filament\Schemas\Schema;
-use Filament\Tables;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Forms\Components\Select;
+use Filament\Resources\Resource;
+use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
@@ -92,7 +91,7 @@ class UserPermissionResource extends Resource
                         'users' => 'Users',
                     ]),
             ])
-           
+
             ->recordActions([
                 EditAction::make(),
             ])

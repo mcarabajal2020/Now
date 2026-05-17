@@ -82,12 +82,14 @@ class User extends Authenticatable implements HasAvatar
     public function canViewResource(string $recurso): bool
     {
         $permission = $this->getPermission($recurso);
+
         return $permission !== null;
     }
 
     public function canEditResource(string $recurso): bool
     {
         $permission = $this->getPermission($recurso);
+
         return $permission === 'editar';
     }
 

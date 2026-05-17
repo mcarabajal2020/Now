@@ -5,6 +5,8 @@ namespace App\Filament\Resources\Tasks\Tables;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 
 class TasksTable
@@ -13,11 +15,11 @@ class TasksTable
     {
         return $table
             ->columns([
-                \Filament\Tables\Columns\TextColumn::make('titulo')
+                TextColumn::make('titulo')
                     ->label('Título')
                     ->searchable(),
 
-               \Filament\Tables\Columns\TextColumn::make('estado')
+                TextColumn::make('estado')
                     ->badge()
                     ->color(fn (string $state): string => match ($state) {
                         'Nuevo' => 'warning',      // amarillo
@@ -28,31 +30,31 @@ class TasksTable
                     ->toggleable()
                     ->sortable(),
 
-                \Filament\Tables\Columns\TextColumn::make('detalle')
+                TextColumn::make('detalle')
                     ->label('Detalle')
                     ->limit(50)
                     ->toggleable(isToggledHiddenByDefault: true),
 
-                \Filament\Tables\Columns\TextColumn::make('solicitante.name')
+                TextColumn::make('solicitante.name')
                     ->label('Solicita')
                     ->toggleable(),
 
-                \Filament\Tables\Columns\TextColumn::make('asignadoA.name')
+                TextColumn::make('asignadoA.name')
                     ->label('Asignado')
                     ->toggleable(),
 
-                \Filament\Tables\Columns\TextColumn::make('fecha_finalizacion')
+                TextColumn::make('fecha_finalizacion')
                     ->label('Finalización')
                     ->dateTime()
                     ->toggleable(),
 
-                \Filament\Tables\Columns\TextColumn::make('ultima_modificacion')
+                TextColumn::make('ultima_modificacion')
                     ->label('Última modificación')
                     ->dateTime()
                     ->toggleable(),
             ])
             ->filters([
-                \Filament\Tables\Filters\SelectFilter::make('estado')
+                SelectFilter::make('estado')
                     ->options([
                         'Nuevo' => 'Nuevo',
                         'En Proceso' => 'En Proceso',
@@ -63,7 +65,6 @@ class TasksTable
             ->emptyStateActions([
                 //
             ])
-
 
             ->recordActions([
                 EditAction::make(),

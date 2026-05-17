@@ -14,6 +14,7 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class TaskResource extends Resource
 {
@@ -33,11 +34,11 @@ class TaskResource extends Resource
     public static function table(Table $table): Table
     {
         return TasksTable::configure($table)
-            ->modifyQueryUsing(function (\Illuminate\Database\Eloquent\Builder $query) {
+            ->modifyQueryUsing(function (Builder $query) {
                 $user = auth()->user();
 
                 // Multiusuario: ver solicitadas por ti o asignadas a ti
-                return $query->where(function (\Illuminate\Database\Eloquent\Builder $q) use ($user) {
+                return $query->where(function (Builder $q) use ($user) {
                     $q->where('usuario_solicita_id', $user->id)
                         ->orWhere('asignado_a_id', $user->id);
                 });

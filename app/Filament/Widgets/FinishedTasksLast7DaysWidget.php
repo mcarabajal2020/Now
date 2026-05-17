@@ -2,10 +2,11 @@
 
 namespace App\Filament\Widgets;
 
+use App\Models\Task;
 use Filament\Actions\BulkActionGroup;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget;
-
 
 class FinishedTasksLast7DaysWidget extends TableWidget
 {
@@ -18,7 +19,7 @@ class FinishedTasksLast7DaysWidget extends TableWidget
 
         return $table
             ->query(function () use ($user, $since) {
-                return \App\Models\Task::query()
+                return Task::query()
                     ->where('estado', 'Finalizado')
                     ->where('fecha_finalizacion', '>=', $since)
                     ->where(function ($q) use ($user) {
@@ -28,8 +29,8 @@ class FinishedTasksLast7DaysWidget extends TableWidget
             })
 
             ->columns([
-                \Filament\Tables\Columns\TextColumn::make('titulo')->label('Tarea'),
-                \Filament\Tables\Columns\TextColumn::make('fecha_finalizacion')->dateTime()->label('Finalización'),
+                TextColumn::make('titulo')->label('Tarea'),
+                TextColumn::make('fecha_finalizacion')->dateTime()->label('Finalización'),
             ])
             ->defaultPaginationPageOption(5)
             ->filters([])
@@ -40,5 +41,3 @@ class FinishedTasksLast7DaysWidget extends TableWidget
             ]);
     }
 }
-
-

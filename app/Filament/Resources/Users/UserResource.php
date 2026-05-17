@@ -23,7 +23,6 @@ class UserResource extends Resource
 
     protected static ?string $navigationLabel = 'Usuarios';
 
-
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedUserGroup;
 
     public static function form(Schema $schema): Schema
@@ -50,4 +49,3 @@ class UserResource extends Resource
         ];
     }
 }
-
