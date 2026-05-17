@@ -14,20 +14,10 @@ trait AuthorizedResource
             return false;
         }
 
+        // Usar la policy de Laravel
         $model = static::$model;
-        $resourceName = class_basename($model);
-        $resourceKey = strtolower($resourceName);
 
-        // Mapear nombres de modelos a permisos
-        $permissionMap = [
-            'task' => 'tasks',
-            'noticia' => 'noticias',
-            'user' => 'users',
-        ];
-
-        $recurso = $permissionMap[$resourceKey] ?? $resourceKey;
-
-        return $user->canViewResource($recurso);
+        return $user->can('viewAny', $model);
     }
 
     /**
@@ -40,18 +30,9 @@ trait AuthorizedResource
             return false;
         }
 
+        // Usar la policy de Laravel
         $model = static::$model;
-        $resourceName = class_basename($model);
-        $resourceKey = strtolower($resourceName);
 
-        $permissionMap = [
-            'task' => 'tasks',
-            'noticia' => 'noticias',
-            'user' => 'users',
-        ];
-
-        $recurso = $permissionMap[$resourceKey] ?? $resourceKey;
-
-        return $user->canEditResource($recurso);
+        return $user->can('create', $model);
     }
 }

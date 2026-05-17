@@ -12,6 +12,11 @@ class NoticiaPolicy
      */
     public function viewAny(User $user): bool
     {
+        // Admin puede ver todas las noticias
+        if ($user->role?->nombre === 'admin') {
+            return true;
+        }
+
         return $user->canViewResource('noticias');
     }
 
@@ -20,6 +25,11 @@ class NoticiaPolicy
      */
     public function view(User $user, Noticia $noticia): bool
     {
+        // Admin puede ver todas las noticias
+        if ($user->role?->nombre === 'admin') {
+            return true;
+        }
+
         return $user->canViewResource('noticias');
     }
 
@@ -28,6 +38,11 @@ class NoticiaPolicy
      */
     public function create(User $user): bool
     {
+        // Admin puede crear noticias
+        if ($user->role?->nombre === 'admin') {
+            return true;
+        }
+
         return $user->canEditResource('noticias');
     }
 
@@ -36,6 +51,11 @@ class NoticiaPolicy
      */
     public function update(User $user, Noticia $noticia): bool
     {
+        // Admin puede editar todas las noticias
+        if ($user->role?->nombre === 'admin') {
+            return true;
+        }
+
         return $user->canEditResource('noticias');
     }
 

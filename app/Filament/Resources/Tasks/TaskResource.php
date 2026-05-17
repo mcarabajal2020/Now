@@ -37,6 +37,11 @@ class TaskResource extends Resource
             ->modifyQueryUsing(function (Builder $query) {
                 $user = auth()->user();
 
+                // Admin ve todas las tareas
+                if ($user->role?->nombre === 'admin') {
+                    return $query;
+                }
+
                 // Multiusuario: ver solicitadas por ti o asignadas a ti
                 return $query->where(function (Builder $q) use ($user) {
                     $q->where('usuario_solicita_id', $user->id)

@@ -11,7 +11,8 @@ class UserPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->canViewResource('users');
+        // Solo admin puede ver usuarios
+        return $user->role?->nombre === 'admin';
     }
 
     /**
@@ -19,7 +20,8 @@ class UserPolicy
      */
     public function view(User $user, User $model): bool
     {
-        return $user->canViewResource('users');
+        // Solo admin puede ver un usuario en particular
+        return $user->role?->nombre === 'admin';
     }
 
     /**
@@ -27,7 +29,8 @@ class UserPolicy
      */
     public function create(User $user): bool
     {
-        return $user->canEditResource('users');
+        // Solo admin puede crear usuarios
+        return $user->role?->nombre === 'admin';
     }
 
     /**
@@ -35,7 +38,13 @@ class UserPolicy
      */
     public function update(User $user, User $model): bool
     {
-        return $user->canEditResource('users');
+        // Admin puede editar cualquier usuario
+        if ($user->role?->nombre === 'admin') {
+            return true;
+        }
+
+        // Un usuario puede editar su propio perfil
+        return $user->id === $model->id;
     }
 
     /**

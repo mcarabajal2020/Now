@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\User;
+use App\Notifications\BirthdayNotification;
 use Illuminate\Support\Facades\Notification;
 
 beforeEach(function () {
@@ -27,13 +28,13 @@ test('birthday notification command sends notifications to users with birthday t
     // Verificar que se envió la notificación al usuario que cumple años
     Notification::assertSentTo(
         [$birthdayUser],
-        \App\Notifications\BirthdayNotification::class
+        BirthdayNotification::class
     );
 
     // Verificar que NO se envió al otro usuario
     Notification::assertNotSentTo(
         [$otherUser],
-        \App\Notifications\BirthdayNotification::class
+        BirthdayNotification::class
     );
 });
 
@@ -58,5 +59,5 @@ test('birthday notification includes correct data', function () {
     $this->artisan('app:birthday-notification')->assertSuccessful();
 
     // Verificar que se envió la notificación con datos correctos
-    Notification::assertSentTo($user, \App\Notifications\BirthdayNotification::class);
+    Notification::assertSentTo($user, BirthdayNotification::class);
 });

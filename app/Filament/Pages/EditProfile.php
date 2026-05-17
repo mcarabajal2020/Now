@@ -27,11 +27,12 @@ class EditProfile extends Page implements HasForms
     public function mount(): void
     {
         $user = auth()->user();
+
         $this->form->fill([
-            'name' => $user->name,
-            'email' => $user->email,
-            'fecha_nacimiento' => $user->fecha_nacimiento,
-            'foto_perfil' => $user->foto_perfil,
+            'name' => $user?->name ?? '',
+            'email' => $user?->email ?? '',
+            'fecha_nacimiento' => $user?->fecha_nacimiento,
+            'foto_perfil' => $user?->foto_perfil ?? null,
         ]);
     }
 

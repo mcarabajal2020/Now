@@ -12,6 +12,11 @@ class TaskPolicy
      */
     public function viewAny(User $user): bool
     {
+        // Admin puede ver todos los tasks
+        if ($user->role?->nombre === 'admin') {
+            return true;
+        }
+
         return $user->canViewResource('tasks');
     }
 
@@ -20,6 +25,11 @@ class TaskPolicy
      */
     public function view(User $user, Task $task): bool
     {
+        // Admin puede ver todos los tasks
+        if ($user->role?->nombre === 'admin') {
+            return true;
+        }
+
         return $user->canViewResource('tasks');
     }
 
@@ -28,6 +38,11 @@ class TaskPolicy
      */
     public function create(User $user): bool
     {
+        // Admin puede crear tasks
+        if ($user->role?->nombre === 'admin') {
+            return true;
+        }
+
         return $user->canEditResource('tasks');
     }
 
@@ -36,6 +51,11 @@ class TaskPolicy
      */
     public function update(User $user, Task $task): bool
     {
+        // Admin puede editar todos los tasks
+        if ($user->role?->nombre === 'admin') {
+            return true;
+        }
+
         return $user->canEditResource('tasks');
     }
 
