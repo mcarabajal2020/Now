@@ -9,9 +9,9 @@ use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
+use Filament\Forms\Form;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
-use Livewire\Attributes\Modelable;
 
 class EditProfile extends Page implements HasForms
 {
@@ -23,7 +23,6 @@ class EditProfile extends Page implements HasForms
 
     protected static ?int $navigationSort = 999;
 
-    #[Modelable]
     public ?array $data = [];
 
     public function mount(): void
@@ -40,49 +39,50 @@ class EditProfile extends Page implements HasForms
         }
     }
 
-    protected function getFormSchema(): array
+    public function form(Form $form): Form
     {
-        return [
-            FileUpload::make('foto_perfil')
-                ->label('Foto de perfil')
-                ->disk('public')
-                ->directory('profile-photos')
-                ->avatar()
-                ->image()
-                ->imageEditor()
-                ->maxSize(2048),
+        return $form
+            ->schema([
+                FileUpload::make('foto_perfil')
+                    ->label('Foto de perfil')
+                    ->disk('public')
+                    ->directory('profile-photos')
+                    ->avatar()
+                    ->image()
+                    ->imageEditor()
+                    ->maxSize(2048),
 
-            TextInput::make('name')
-                ->label('Nombre')
-                ->required()
-                ->maxLength(255),
+                TextInput::make('name')
+                    ->label('Nombre')
+                    ->required()
+                    ->maxLength(255),
 
-            TextInput::make('email')
-                ->label('Email')
-                ->required()
-                ->email()
-                ->maxLength(255),
+                TextInput::make('email')
+                    ->label('Email')
+                    ->required()
+                    ->email()
+                    ->maxLength(255),
 
-            DatePicker::make('fecha_nacimiento')
-                ->label('Fecha de nacimiento')
-                ->native(false)
-                ->maxDate(now()),
+                DatePicker::make('fecha_nacimiento')
+                    ->label('Fecha de nacimiento')
+                    ->native(false)
+                    ->maxDate(now()),
 
-            TextInput::make('password')
-                ->label('Contraseña (opcional)')
-                ->password()
-                ->dehydrateStateUsing(fn ($state) => filled($state) ? bcrypt($state) : null)
-                ->nullable()
-                ->maxLength(255)
-                ->revealable(),
-        ];
+                TextInput::make('password')
+                    ->label('Contraseña (opcional)')
+                    ->password()
+                    ->dehydrateStateUsing(fn ($state) => filled($state) ? bcrypt($state) : null)
+                    ->nullable()
+                    ->maxLength(255)
+                    ->revealable(),
+            ])
+            ->statePath('data');
     }
 
     public function save(): void
     {
         $data = $this->form->getState();
 
-        // No actualizar password si está vacío
         if (empty($data['password'])) {
             unset($data['password']);
         }
@@ -94,6 +94,8 @@ class EditProfile extends Page implements HasForms
             ->title('Perfil actualizado')
             ->body('Tu perfil ha sido actualizado correctamente.')
             ->send();
+
+        $this->form->fill($data);
     }
 
     protected function getFormActions(): array
