@@ -3,88 +3,60 @@
 namespace App\Filament\Pages;
 
 use BackedEnum;
-use Filament\Actions\Action;
-use Filament\Forms\Components\DatePicker;
-use Filament\Forms\Components\FileUpload;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Concerns\InteractsWithForms;
-use Filament\Forms\Contracts\HasForms;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use Livewire\Attributes\Validate;
 
-class EditProfile extends Page implements HasForms
+class EditProfile extends Page
 {
-    use InteractsWithForms;
-
     protected static ?string $navigationLabel = 'Mi Perfil';
 
     protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-user';
 
     protected static ?int $navigationSort = 999;
 
-    public ?array $data = [];
+    protected string $view = 'filament.pages.edit-profile';
+
+    #[Validate('required|string|max:255')]
+    public ?string $name = null;
+
+    #[Validate('required|email|max:255')]
+    public ?string $email = null;
+
+    public ?string $fecha_nacimiento = null;
+
+    public ?string $foto_perfil = null;
+
+    #[Validate('nullable|string|min:8')]
+    public ?string $password = null;
 
     public function mount(): void
     {
-        $user = auth()->user();
-
-        if ($user) {
-            $this->form->fill([
-                'name' => $user->name,
-                'email' => $user->email,
-                'fecha_nacimiento' => $user->fecha_nacimiento,
-                'foto_perfil' => $user->foto_perfil,
-            ]);
-        }
-    }
-
-    protected function getFormSchema(): array
-    {
-        return [
-            FileUpload::make('foto_perfil')
-                ->label('Foto de perfil')
-                ->disk('public')
-                ->directory('profile-photos')
-                ->avatar()
-                ->image()
-                ->imageEditor()
-                ->maxSize(2048),
-
-            TextInput::make('name')
-                ->label('Nombre')
-                ->required()
-                ->maxLength(255),
-
-            TextInput::make('email')
-                ->label('Email')
-                ->required()
-                ->email()
-                ->maxLength(255),
-
-            DatePicker::make('fecha_nacimiento')
-                ->label('Fecha de nacimiento')
-                ->native(false)
-                ->maxDate(now()),
-
-            TextInput::make('password')
-                ->label('Contraseña (opcional)')
-                ->password()
-                ->dehydrateStateUsing(fn ($state) => filled($state) ? bcrypt($state) : null)
-                ->nullable()
-                ->maxLength(255)
-                ->revealable(),
-        ];
+        $user = Auth::user();
+        $this->name = $user->name;
+        $this->email = $user->email;
+        $this->fecha_nacimiento = $user->fecha_nacimiento;
+        $this->foto_perfil = $user->foto_perfil;
     }
 
     public function save(): void
     {
-        $data = $this->form->getState();
+        $this->validate();
 
-        if (empty($data['password'])) {
-            unset($data['password']);
+        $user = Auth::user();
+        $data = [
+            'name' => $this->name,
+            'email' => $this->email,
+            'fecha_nacimiento' => $this->fecha_nacimiento,
+        ];
+
+        if (filled($this->password)) {
+            $data['password'] = Hash::make($this->password);
         }
 
-        auth()->user()->update($data);
+        $user->update($data);
 
         Notification::make()
             ->success()
@@ -92,13 +64,9 @@ class EditProfile extends Page implements HasForms
             ->body('Tu perfil ha sido actualizado correctamente.')
             ->send();
     }
-
-    protected function getFormActions(): array
-    {
-        return [
-            Action::make('save')
-                ->label('Guardar cambios')
-                ->submit('save'),
-        ];
-    }
 }
+
+
+
+
+
