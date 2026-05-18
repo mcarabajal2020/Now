@@ -9,7 +9,6 @@ use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
-use Filament\Forms\Form;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 
@@ -39,44 +38,42 @@ class EditProfile extends Page implements HasForms
         }
     }
 
-    public function form(Form $form): Form
+    protected function getFormSchema(): array
     {
-        return $form
-            ->schema([
-                FileUpload::make('foto_perfil')
-                    ->label('Foto de perfil')
-                    ->disk('public')
-                    ->directory('profile-photos')
-                    ->avatar()
-                    ->image()
-                    ->imageEditor()
-                    ->maxSize(2048),
+        return [
+            FileUpload::make('foto_perfil')
+                ->label('Foto de perfil')
+                ->disk('public')
+                ->directory('profile-photos')
+                ->avatar()
+                ->image()
+                ->imageEditor()
+                ->maxSize(2048),
 
-                TextInput::make('name')
-                    ->label('Nombre')
-                    ->required()
-                    ->maxLength(255),
+            TextInput::make('name')
+                ->label('Nombre')
+                ->required()
+                ->maxLength(255),
 
-                TextInput::make('email')
-                    ->label('Email')
-                    ->required()
-                    ->email()
-                    ->maxLength(255),
+            TextInput::make('email')
+                ->label('Email')
+                ->required()
+                ->email()
+                ->maxLength(255),
 
-                DatePicker::make('fecha_nacimiento')
-                    ->label('Fecha de nacimiento')
-                    ->native(false)
-                    ->maxDate(now()),
+            DatePicker::make('fecha_nacimiento')
+                ->label('Fecha de nacimiento')
+                ->native(false)
+                ->maxDate(now()),
 
-                TextInput::make('password')
-                    ->label('Contraseña (opcional)')
-                    ->password()
-                    ->dehydrateStateUsing(fn ($state) => filled($state) ? bcrypt($state) : null)
-                    ->nullable()
-                    ->maxLength(255)
-                    ->revealable(),
-            ])
-            ->statePath('data');
+            TextInput::make('password')
+                ->label('Contraseña (opcional)')
+                ->password()
+                ->dehydrateStateUsing(fn ($state) => filled($state) ? bcrypt($state) : null)
+                ->nullable()
+                ->maxLength(255)
+                ->revealable(),
+        ];
     }
 
     public function save(): void
@@ -94,8 +91,6 @@ class EditProfile extends Page implements HasForms
             ->title('Perfil actualizado')
             ->body('Tu perfil ha sido actualizado correctamente.')
             ->send();
-
-        $this->form->fill($data);
     }
 
     protected function getFormActions(): array
