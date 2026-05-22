@@ -25,6 +25,9 @@ class UsersTable
                 TextColumn::make('name')->searchable()->sortable(),
                 TextColumn::make('email')->searchable()->sortable(),
                 TextColumn::make('fecha_nacimiento')->date()->label('Nacimiento')->sortable(),
+                TextColumn::make('area.nombre')
+                    ->label('Área')
+                    ->toggleable(),
                 TextColumn::make('created_at')->dateTime()->label('Creado')->sortable(),
             ])
             ->filters([

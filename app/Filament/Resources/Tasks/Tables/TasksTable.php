@@ -43,6 +43,10 @@ class TasksTable
                     ->label('Asignado')
                     ->toggleable(),
 
+                TextColumn::make('area.nombre')
+                    ->label('Área')
+                    ->toggleable(),
+
                 TextColumn::make('fecha_finalizacion')
                     ->label('Finalización')
                     ->dateTime()
