@@ -14,7 +14,7 @@ class HistoriesRelationManager extends RelationManager
 
     protected static ?string $recordTitleAttribute = 'comentario';
 
-    public static function table(Table $table): Table
+    public function table(Table $table): Table
     {
         return $table
             ->columns([
@@ -44,16 +44,16 @@ class HistoriesRelationManager extends RelationManager
 
                 TextColumn::make('old_value')
                     ->label('Anterior')
-                    ->formatStateUsing(fn ($state): ?string => self::resolveValue($state)),
+                    ->formatStateUsing(fn ($state): ?string => $this->resolveValue($state)),
 
                 TextColumn::make('new_value')
                     ->label('Nuevo')
-                    ->formatStateUsing(fn ($state): ?string => self::resolveValue($state)),
+                    ->formatStateUsing(fn ($state): ?string => $this->resolveValue($state)),
             ])
             ->defaultSort('created_at', 'desc');
     }
 
-    protected static function resolveValue($state): ?string
+    protected function resolveValue($state): ?string
     {
         if (blank($state)) {
             return null;
