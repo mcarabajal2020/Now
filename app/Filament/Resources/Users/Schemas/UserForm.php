@@ -46,6 +46,13 @@ class UserForm
                     ->preload()
                     ->nullable(),
 
+                Select::make('area_id')
+                    ->label('Área')
+                    ->relationship('area', 'nombre')
+                    ->searchable()
+                    ->preload()
+                    ->nullable(),
+
                 TextInput::make('password')
                     ->label('Password')
                     ->password()
