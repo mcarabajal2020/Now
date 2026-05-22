@@ -15,6 +15,7 @@ class Task extends Model
         'ultima_modificacion',
         'usuario_solicita_id',
         'asignado_a_id',
+        'area_id',
         'fecha_finalizacion',
     ];
 
@@ -32,5 +33,10 @@ class Task extends Model
     public function asignadoA()
     {
         return $this->belongsTo(User::class, 'asignado_a_id');
+    }
+
+    public function area()
+    {
+        return $this->belongsTo(Area::class, 'area_id');
     }
 }

@@ -63,6 +63,13 @@ class TaskForm
                     ->searchable()
                     ->preload()
                     ->nullable(),
+                Select::make('area_id')
+                    ->label('Área')
+                    ->relationship('area', 'nombre')
+                    ->searchable()
+                    ->preload()
+                    ->nullable()
+                    ->helperText('Asignar este ticket a un área en lugar de a una persona'),
 
                 Hidden::make('fecha_finalizacion')
                     ->nullable(),

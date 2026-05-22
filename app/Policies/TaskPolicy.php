@@ -30,6 +30,11 @@ class TaskPolicy
             return true;
         }
 
+        // Si el task está asignado a un área y el usuario pertenece a la misma área
+        if ($task->area_id && $user->area_id && $task->area_id === $user->area_id) {
+            return true;
+        }
+
         return $user->canViewResource('tasks');
     }
 
@@ -54,6 +59,11 @@ class TaskPolicy
         // Admin puede editar todos los tasks
         if ($user->role?->nombre === 'admin') {
             return true;
+        }
+
+        // Si el task está asignado a un área y el usuario pertenece a la misma área, permitir edición solo si el rol/permiso lo permite
+        if ($task->area_id && $user->area_id && $task->area_id === $user->area_id) {
+            return $user->canEditResource('tasks');
         }
 
         return $user->canEditResource('tasks');

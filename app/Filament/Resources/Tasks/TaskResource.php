@@ -46,6 +46,11 @@ class TaskResource extends Resource
                 return $query->where(function (Builder $q) use ($user) {
                     $q->where('usuario_solicita_id', $user->id)
                         ->orWhere('asignado_a_id', $user->id);
+
+                    // Si el usuario pertenece a un área, también ver tareas asignadas a esa área
+                    if ($user->area_id) {
+                        $q->orWhere('area_id', $user->area_id);
+                    }
                 });
             });
     }

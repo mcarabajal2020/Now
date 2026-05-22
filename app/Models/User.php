@@ -40,6 +40,11 @@ class User extends Authenticatable implements HasAvatar
         return $this->belongsTo(Role::class);
     }
 
+    public function area(): BelongsTo
+    {
+        return $this->belongsTo(Area::class);
+    }
+
     public function userPermissions(): HasMany
     {
         return $this->hasMany(UserPermission::class);
