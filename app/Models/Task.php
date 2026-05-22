@@ -39,4 +39,9 @@ class Task extends Model
     {
         return $this->belongsTo(Area::class, 'area_id');
     }
+
+    public function histories()
+    {
+        return $this->hasMany(TaskHistory::class);
+    }
 }

@@ -37,6 +37,16 @@ class CreateTask extends CreateRecord
         $this->sendAssignedTaskNotification($this->record->asignado_a_id);
     }
 
+    protected function afterPersist(): void
+    {
+        // Registrar historial de creación
+        $this->record->histories()->create([
+            'user_id' => auth()->id(),
+            'tipo' => 'creado',
+            'comentario' => 'Tarea creada por '.(auth()->user()?->name ?? 'Sistema'),
+        ]);
+    }
+
     private function sendAssignedTaskNotification(?int $assignedUserId): void
     {
         if (! $assignedUserId) {

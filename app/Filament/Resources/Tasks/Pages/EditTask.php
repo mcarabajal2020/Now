@@ -15,16 +15,21 @@ class EditTask extends EditRecord
 
     private ?int $previousAssignedUserId = null;
 
+    private ?string $previousEstado = null;
+
+    private ?string $newProgressDetail = null;
+
     protected function mutateFormDataBeforeSave(array $data): array
     {
         $this->previousAssignedUserId = $this->record->asignado_a_id;
+        $this->previousEstado = $this->record->estado;
 
-        $newProgressDetail = trim((string) ($data['nuevo_detalle'] ?? ''));
+        $this->newProgressDetail = trim((string) ($data['nuevo_detalle'] ?? ''));
 
         unset($data['nuevo_detalle']);
 
-        if ($newProgressDetail !== '' && $this->isAssignedToCurrentUser()) {
-            $data['detalle'] = $this->appendProgressDetail($this->record->detalle, $newProgressDetail);
+        if ($this->newProgressDetail !== '' && $this->isAssignedToCurrentUser()) {
+            $data['detalle'] = $this->appendProgressDetail($this->record->detalle, $this->newProgressDetail);
 
             if ($this->record->estado === 'Nuevo') {
                 $data['estado'] = 'En Proceso';
@@ -49,8 +54,37 @@ class EditTask extends EditRecord
     {
         $this->record->refresh();
 
+        // Enviar notificación si cambió la asignación
         if ($this->record->asignado_a_id !== $this->previousAssignedUserId) {
+            $this->record->histories()->create([
+                'user_id' => auth()->id(),
+                'tipo' => 'asignacion',
+                'old_value' => (string) $this->previousAssignedUserId,
+                'new_value' => (string) $this->record->asignado_a_id,
+                'comentario' => "Asignado a usuario ID {$this->record->asignado_a_id}",
+            ]);
+
             $this->sendAssignedTaskNotification($this->record->asignado_a_id);
+        }
+
+        // Registrar cambio de estado
+        if ($this->previousEstado !== $this->record->estado) {
+            $this->record->histories()->create([
+                'user_id' => auth()->id(),
+                'tipo' => 'estado',
+                'old_value' => (string) $this->previousEstado,
+                'new_value' => (string) $this->record->estado,
+                'comentario' => "Estado: {$this->previousEstado} -> {$this->record->estado}",
+            ]);
+        }
+
+        // Registrar nuevo detalle de avance
+        if (filled($this->newProgressDetail)) {
+            $this->record->histories()->create([
+                'user_id' => auth()->id(),
+                'tipo' => 'comentario',
+                'comentario' => $this->newProgressDetail,
+            ]);
         }
     }
 
