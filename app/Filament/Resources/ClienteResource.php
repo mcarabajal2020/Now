@@ -5,12 +5,14 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\ClienteResource\Pages;
 use App\Filament\Resources\ClienteResource\RelationManagers\CbusRelationManager;
 use App\Models\Cliente;
+use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
+use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\Storage;
@@ -21,6 +23,11 @@ class ClienteResource extends Resource
     protected static ?string $model = Cliente::class;
 
     protected static ?string $navigationLabel = 'Clientes';
+
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::UserCircle;
+
+    protected static ?int $navigationSort = 4;
+
 
     public static function form(Schema $schema): Schema
     {

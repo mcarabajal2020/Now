@@ -12,6 +12,8 @@ class OpenTasksWidget extends TableWidget
 {
     protected static ?int $sort = 1;
 
+    protected static ?string $heading = 'Tareas Abiertas';
+
     public function table(Table $table): Table
     {
         $user = auth()->user();

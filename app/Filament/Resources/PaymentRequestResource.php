@@ -9,6 +9,7 @@ use App\Models\ClienteCbu;
 use App\Models\PaymentRequest;
 use App\Models\PaymentRequestLog;
 use App\Models\User;
+use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
@@ -20,6 +21,7 @@ use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
@@ -30,6 +32,10 @@ class PaymentRequestResource extends Resource
     protected static ?string $model = PaymentRequest::class;
 
     protected static ?string $navigationLabel = 'Pedidos de fondos';
+
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::CurrencyDollar;
+
+    protected static ?int $navigationSort = 3;
 
     public static function getEloquentQuery(): Builder
     {
