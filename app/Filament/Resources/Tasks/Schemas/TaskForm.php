@@ -39,8 +39,28 @@ class TaskForm
                     ->rows(4)
                     ->maxLength(5000)
                     ->visibleOn('edit')
-                    ->disabled(fn (?Task $record): bool => $record?->asignado_a_id !== auth()->id() || $record?->estado === 'Finalizado')
-                    ->dehydrated(fn (?Task $record): bool => $record?->asignado_a_id === auth()->id() && $record?->estado !== 'Finalizado')
+                    ->disabled(fn (?Task $record): bool =>
+                        // Deshabilitado si la tarea está finalizada o el usuario no pertenece al área ni es asignado
+                        ($record?->estado === 'Finalizado') ||
+                        (! auth()->check()) ||
+                        (! (
+                            auth()->id() === $record?->asignado_a_id ||
+                            (
+                                ! is_null(auth()->user()?->area_id) &&
+                                ! is_null($record?->area_id) &&
+                                auth()->user()?->area_id === $record?->area_id
+                            )
+                        ))
+                    )
+                    ->dehydrated(fn (?Task $record): bool => filled($record) && (
+                        auth()->id() === $record->asignado_a_id ||
+                        (
+                            ! is_null(auth()->user()?->area_id) &&
+                            ! is_null($record->area_id) &&
+                            auth()->user()?->area_id === $record->area_id
+                        )
+                    ) && $record->estado !== 'Finalizado'
+                    )
                     ->columnSpanFull(),
 
                 Hidden::make('estado')

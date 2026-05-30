@@ -6,6 +6,7 @@ use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Schema;
 
 class UserForm
@@ -60,6 +61,17 @@ class UserForm
                     ->nullable()
                     ->maxLength(255)
                     ->revealable(),
+                Toggle::make('puede_autorizar')
+                    ->label('Puede autorizar pagos')
+                    ->visible(fn () => auth()->user()?->role?->nombre === 'admin'),
+
+                Toggle::make('puede_realizar_pago')
+                    ->label('Puede marcar pago realizado')
+                    ->visible(fn () => auth()->user()?->role?->nombre === 'admin'),
+
+                Toggle::make('puede_realizar_transferencia')
+                    ->label('Puede marcar transferencia realizada')
+                    ->visible(fn () => auth()->user()?->role?->nombre === 'admin'),
             ]);
     }
 }

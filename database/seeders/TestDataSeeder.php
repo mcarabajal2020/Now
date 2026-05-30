@@ -19,6 +19,9 @@ class TestDataSeeder extends Seeder
             'email' => 'admin@test.com',
             'password' => bcrypt('password'),
             'role_id' => Role::where('nombre', 'admin')->first()?->id,
+            'puede_autorizar' => true,
+            'puede_realizar_pago' => true,
+            'puede_realizar_transferencia' => true,
         ]);
 
         $editor = User::create([

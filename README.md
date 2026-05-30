@@ -121,3 +121,42 @@ If you discover a security vulnerability within Laravel, please send an e-mail t
 ## License
 
 The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+
+## Importación de clientes desde Excel/CSV
+
+La aplicación permite importar clientes desde un archivo `.csv` o `.xlsx` vía el recurso `Cliente` en el panel de Filament.
+
+- Formatos aceptados: `.csv`, `.xlsx`.
+- Las cabeceras se normalizan (insensible a mayúsculas/minúsculas y espacios).
+- Campos obligatorios (por fila):
+	- `numero_cuenta` — identificador único de la cuenta (se usa para `updateOrCreate`).
+	- `nombre_cuenta` — nombre asociado a la cuenta.
+- Campos opcionales para importar CBU en la misma fila:
+	- `banco` — nombre del banco.
+	- `cbu` — número de CBU.
+	- `observaciones` — texto libre con notas.
+
+Reglas de importación:
+- Solo se procesan las filas que contienen ambos campos obligatorios; las filas con cualquiera de estos vacíos se saltan.
+- Si `numero_cuenta` ya existe en la base de datos, se actualiza `nombre_cuenta`.
+- Si el archivo contiene las columnas opcionales `banco`, `cbu` y/o `observaciones`, la importación intentará crear el registro de CBU asociado al cliente (una fila = un CBU). Si estos campos están vacíos, no se creará CBU para esa fila.
+
+Ejemplo de cabecera válida (CSV o Excel):
+
+numero_cuenta,nombre_cuenta,banco,cbu,observaciones
+
+Pasos para usar la importación desde la UI:
+1. Ir al panel de Filament → `Clientes`.
+2. Hacer clic en `Importar clientes` (botón en la barra de herramientas).
+3. Seleccionar el archivo `.csv` o `.xlsx` con la cabecera adecuada.
+4. Confirmar; las filas válidas se importarán/actualizarán.
+
+Comandos útiles para preparar el entorno si hace falta:
+```bash
+composer dump-autoload
+php artisan migrate
+php artisan view:clear
+php artisan config:clear
+php artisan cache:clear
+```
+

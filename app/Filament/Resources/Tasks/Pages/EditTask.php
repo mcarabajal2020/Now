@@ -141,7 +141,23 @@ class EditTask extends EditRecord
 
     private function isAssignedToCurrentUser(): bool
     {
-        return $this->record->asignado_a_id === auth()->id();
+        $currentUser = auth()->user();
+
+        if (! $currentUser) {
+            return false;
+        }
+
+        // Permitir al usuario asignado
+        if ($this->record->asignado_a_id === $currentUser->id) {
+            return true;
+        }
+
+        // Permitir a cualquier usuario de la misma área
+        if (! is_null($currentUser->area_id) && ! is_null($this->record->area_id)) {
+            return $currentUser->area_id === $this->record->area_id;
+        }
+
+        return false;
     }
 
     private function appendProgressDetail(?string $currentDetail, string $newProgressDetail): string
