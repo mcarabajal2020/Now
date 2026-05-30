@@ -175,6 +175,13 @@ class PaymentRequestResource extends Resource
                 TextColumn::make('solicitante.name')->label('Solicitante'),
 
                 TextColumn::make('estado')
+                    ->badge()
+                    ->color(fn (string $state): string => match ($state) {
+                        'pendiente_autorizacion' => 'danger',      // Rojo
+                        'pendiente_pago' => 'warning',    // amarillo
+                        'pendiente_transferencia' => 'info',  // celeste
+                        'terminado' => 'success',  // verde
+                    })
                     ->label('Estado')
                     ->formatStateUsing(fn ($state) => match ($state) {
                         'pendiente_autorizacion' => 'Pendiente autorización',
