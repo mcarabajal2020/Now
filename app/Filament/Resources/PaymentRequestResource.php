@@ -156,6 +156,7 @@ class PaymentRequestResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->defaultSort('created_at', 'desc')
             ->columns([
                 TextColumn::make('cliente.numero_cuenta')
                     ->label('Número de cuenta')
@@ -187,6 +188,7 @@ class PaymentRequestResource extends Resource
                 TextColumn::make('autorizadoPor.name')->label('Autorizó')->sortable(),
                 TextColumn::make('pagadoPor.name')->label('Pagó')->sortable(),
                 TextColumn::make('transferidoPor.name')->label('Transfirió')->sortable(),
+            
             ])
             ->filters([
                 SelectFilter::make('estado')

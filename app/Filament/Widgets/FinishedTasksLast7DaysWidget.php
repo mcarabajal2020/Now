@@ -14,7 +14,6 @@ class FinishedTasksLast7DaysWidget extends TableWidget
 
     protected static ?string $heading = 'Tareas Finalizadas Últimos 7 Días';
 
-
     public function table(Table $table): Table
     {
         $user = auth()->user();
