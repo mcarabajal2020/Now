@@ -42,6 +42,31 @@ class ClienteResource extends Resource
                     ->label('Nombre de cuenta')
                     ->required()
                     ->maxLength(255),
+
+                // Tags son solo referencia externa; no se enganchan a ninguna otra entidad.
+                TextInput::make('tags')
+                    ->label('Tags')
+                    ->placeholder('Ej: ABC,XYZ,OTRO')
+                    ->helperText('Separar por coma. Se guardan como lista JSON.')
+                    ->columnSpanFull()
+                    ->dehydrateStateUsing(function ($state) {
+                        if (blank($state)) {
+                            return null;
+                        }
+
+                        if (is_array($state)) {
+                            return array_values(array_filter(array_map(fn ($t) => trim((string) $t), $state)));
+                        }
+
+                        $parts = explode(',', (string) $state);
+
+                        return array_values(
+                            array_filter(
+                                array_map(fn ($t) => trim((string) $t), $parts),
+                                fn ($t) => $t !== ''
+                            )
+                        );
+                    })
             ]);
     }
 
@@ -51,6 +76,32 @@ class ClienteResource extends Resource
             ->columns([
                 TextColumn::make('numero_cuenta')->label('Número de cuenta')->searchable(),
                 TextColumn::make('nombre_cuenta')->label('Nombre de cuenta')->searchable(),
+                TextColumn::make('tags')
+                    ->label('Tags')
+                    ->formatStateUsing(fn ($state) => is_array($state) ? implode(', ', $state) : ($state ? (string) $state : null))
+                    ->toggleable(),
+            ])
+            ->filters([
+                \Filament\Tables\Filters\SelectFilter::make('tag')
+                    ->label('Filtrar por tag')
+                    ->options(fn () => \App\Models\Cliente::query()
+                        ->whereNotNull('tags')
+                        ->get()
+                        ->flatMap(fn ($c) => (array) $c->tags)
+                        ->unique()
+                        ->sort()
+                        ->values()
+                        ->mapWithKeys(fn ($t) => [$t => $t])
+                        ->toArray())
+                    ->query(function (\Illuminate\Database\Eloquent\Builder $query, $data) {
+                        $value = $data['value'] ?? null;
+
+                        if (blank($value)) {
+                            return $query;
+                        }
+
+                        return $query->whereJsonContains('tags', $value);
+                    }),
             ])
             ->recordActions([
                 EditAction::make(),

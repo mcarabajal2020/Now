@@ -17,6 +17,7 @@ use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\FileUpload;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Section;
@@ -54,6 +55,40 @@ class PaymentRequestResource extends Resource
     public static function form(Schema $schema): Schema
     {
         return $schema->components([
+            TextInput::make('cliente_tag')
+                ->label('Tag de cliente')
+                ->numeric()
+                ->placeholder('Ej: 123')
+                ->helperText('Si se informa, se cargará el cliente asociado a ese tag.')
+                ->reactive()
+                ->afterStateUpdated(function ($state, callable $set) {
+                    $tag = blank($state) ? null : (string) $state;
+
+                    if (blank($tag)) {
+                        return;
+                    }
+
+                    // tags son numéricos => se guardan como strings dentro del JSON
+                    $cliente = Cliente::query()->whereJsonContains('tags', $tag)->first();
+
+                    if (! $cliente) {
+                        $set('cliente_id', null);
+                        $set('numero_cuenta', null);
+                        $set('nombre_cuenta', null);
+                        $set('cliente_cbu_id', null);
+
+                        return;
+                    }
+
+                    $set('cliente_id', $cliente->id);
+                    $set('numero_cuenta', $cliente->numero_cuenta);
+                    $set('nombre_cuenta', $cliente->nombre_cuenta);
+
+                    // cliente_cbu_id se recalculará cuando cargue el cliente_id
+                    $set('cliente_cbu_id', null);
+                })
+                ->dehydrated(false),
+
             Select::make('cliente_id')
                 ->label('Cliente')
                 ->options(fn () => Cliente::all()->mapWithKeys(fn ($c) => [$c->id => ($c->numero_cuenta.' - '.$c->nombre_cuenta)])->toArray())
@@ -67,6 +102,7 @@ class PaymentRequestResource extends Resource
                         $cliente = Cliente::find($state);
                         $set('numero_cuenta', $cliente?->numero_cuenta);
                         $set('nombre_cuenta', $cliente?->nombre_cuenta);
+                        $set('cliente_cbu_id', null);
                     }
                 }),
 
@@ -94,9 +130,35 @@ class PaymentRequestResource extends Resource
                 ->dehydrated(fn (?PaymentRequest $record): bool => static::canUpdateRequestDetails($record))
                 ->required(),
 
+            TextInput::make('total_pagado')
+                ->label('Total pagado')
+                ->numeric()
+                ->disabled(fn (?PaymentRequest $record): bool => ! static::canUpdateRequestDetails($record))
+                ->dehydrated(fn (?PaymentRequest $record): bool => static::canUpdateRequestDetails($record))
+                ->nullable(),
+
+
             DatePicker::make('fecha_pago')->label('Fecha de pago')->native(false),
 
-            Textarea::make('observaciones')->label('Observaciones')->columnSpanFull(),
+            Textarea::make('observaciones')
+                ->label('Observaciones')
+                ->columnSpanFull(),
+
+            Textarea::make('observaciones_pago')
+                ->label('Observaciones (pago)')
+                ->columnSpanFull(),
+
+            FileUpload::make('imagenes')
+                ->label('Imágenes')
+                ->multiple()
+                ->disk('public')
+                ->directory('payment-requests')
+                ->image()
+                ->maxSize(10240)
+                ->columnSpanFull()
+                ->disabled(fn (?PaymentRequest $record): bool => ! static::canUpdateRequestDetails($record))
+                ->dehydrated(fn (?PaymentRequest $record): bool => static::canUpdateRequestDetails($record))
+                ->preserveFilenames(),
         ]);
     }
 
@@ -113,29 +175,53 @@ class PaymentRequestResource extends Resource
                         ->label('Nombre de cuenta')
                         ->getStateUsing(fn (PaymentRequest $record): ?string => $record->cliente?->nombre_cuenta ?? $record->nombre_cuenta),
 
-                    TextEntry::make('clienteCbu.cbu')
+                TextEntry::make('clienteCbu.cbu')
                         ->label('CBU'),
+
+                    TextEntry::make('estado')
+                        ->label('Estado')
+                        ->formatStateUsing(fn (?string $state): ?string => match ($state) {
+                            'pendiente_autorizacion' => 'Pendiente autorización',
+                            'pendiente_pago' => 'Pendiente pago',
+                            'pendiente_transferencia' => 'Pendiente transferencia',
+                        'terminado' => 'Terminado',
+                            'cancelado' => 'Cancelado',
+                            default => $state,
+                        }),
 
                     TextEntry::make('monto')
                         ->label('Monto solicitado')
+                        ->formatStateUsing(fn ($state): ?string => is_null($state) ? null : (number_format((float) $state, 2, ',', '.').' ARS')),
+
+
+                    TextEntry::make('total_pagado')
+                        ->label('Total pagado')
                         ->formatStateUsing(fn ($state): ?string => is_null($state) ? null : (number_format((float) $state, 2, ',', '.').' ARS')),
 
                     TextEntry::make('fecha_pago')
                         ->label('Fecha de pago')
                         ->date(),
 
-                    TextEntry::make('estado')
-                        ->label('Estado')
-                        ->formatStateUsing(fn ($state) => match ($state) {
-                            'pendiente_autorizacion' => 'Pendiente autorización',
-                            'pendiente_pago' => 'Pendiente pago',
-                            'pendiente_transferencia' => 'Pendiente transferencia',
-                            'terminado' => 'Terminado',
-                            default => $state,
-                        }),
-
                     TextEntry::make('observaciones')
-                        ->label('Observaciones')
+                        ->label('Observaciones'),
+
+                    TextEntry::make('observaciones_pago')
+                        ->label('Observaciones (pago)')
+                        ->columnSpanFull(),
+
+                    TextEntry::make('imagenes')
+                        ->label('Imágenes')
+                        ->formatStateUsing(function ($state) {
+                            $items = is_array($state) ? $state : (is_null($state) ? [] : (array) $state);
+                            $items = array_values(array_filter($items));
+
+                            if (empty($items)) {
+                                return null;
+                            }
+
+                            // Mostrar separadas por salto; Filament la renderiza como texto.
+                            return implode("\n", array_map(fn ($p) => (string) $p, $items));
+                        })
                         ->columnSpanFull(),
                 ])
                 ->columns(2),
@@ -198,6 +284,32 @@ class PaymentRequestResource extends Resource
             
             ])
             ->filters([
+                // Filtro solo afecta a la lista (no al formulario de creación/edición)
+                SelectFilter::make('tag')
+                    ->label('Tag de cliente')
+                    ->options(fn () => 
+                        Cliente::query()
+                            ->whereNotNull('tags')
+                            ->get()
+                            ->flatMap(fn ($c) => (array) $c->tags)
+                            ->unique()
+                            ->sort()
+                            ->values()
+                            ->mapWithKeys(fn ($t) => [$t => $t])
+                            ->toArray()
+                    )
+                    ->query(function (Builder $query, array $data) {
+                        $value = $data['value'] ?? null;
+
+                        if (blank($value)) {
+                            return $query;
+                        }
+
+                        return $query->whereHas('cliente', function (Builder $q) use ($value) {
+                            $q->whereJsonContains('tags', $value);
+                        });
+                    }),
+                
                 SelectFilter::make('estado')
                     ->label('Estado')
                     ->options([
@@ -264,8 +376,33 @@ class PaymentRequestResource extends Resource
                         ]);
                     }),
 
+                Action::make('cancel')
+                    ->label('Cancelar')
+                    ->visible(fn (PaymentRequest $record): bool => auth()->user()?->role?->nombre === 'admin' && ! in_array($record->estado, ['terminado'], true))
+                    ->form([
+                        TextInput::make('cancelacion_observaciones')
+                            ->label('Observaciones de cancelación')
+                            ->maxLength(2000),
+                    ])
+                    ->action(function (PaymentRequest $record, array $data) {
+                        $record->update([
+                            'estado' => 'cancelado',
+                            'cancelado_por_id' => auth()->id(),
+                            'cancelado_at' => now(),
+                            'cancelacion_observaciones' => blank($data['cancelacion_observaciones'] ?? null) ? null : (string) $data['cancelacion_observaciones'],
+                        ]);
+
+                        PaymentRequestLog::create([
+                            'payment_request_id' => $record->id,
+                            'event' => 'cancelado',
+                            'user_id' => auth()->id(),
+                            'message' => blank($data['cancelacion_observaciones'] ?? null) ? null : (string) $data['cancelacion_observaciones'],
+                            'created_at' => now(),
+                        ]);
+                    }),
+
                 EditAction::make()
-                    ->visible(fn (PaymentRequest $record): bool => $record->estado !== 'terminado'),
+                    ->visible(fn (PaymentRequest $record): bool => ! in_array($record->estado, ['terminado', 'cancelado'], true)),
             ]);
     }
 

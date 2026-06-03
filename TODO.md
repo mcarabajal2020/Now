@@ -1,0 +1,16 @@
+- [x] Agregar columna `clientes.tags` (json) via migración
+- [x] Actualizar modelo `Cliente` ($fillable + casts)
+- [x] Actualizar `ClienteResource` (campo Tags + columna + filtro por tag)
+- [x] Actualizar `PaymentRequestResource` (filtro por tag de cliente en tabla)
+- [x] Agregar selector en FORM de `PaymentRequestResource` para elegir cliente por tag (tag es numérico) y poblar `cliente_id` en base a ese tag
+- [ ] Agregar migración y campos en `payment_requests`: `total_pagado`, `observaciones_pago`, `imagenes` (json)
+- [ ] Actualizar modelo `PaymentRequest` con casts/fillables
+- [ ] Actualizar `PaymentRequestResource::form()`:
+  - [ ] campo `total_pagado` (manual)
+  - [ ] campo `observaciones_pago`
+  - [ ] `FileUpload` multi para `imagenes` guardando solo ruta/URL (en BD JSON)
+- [ ] Actualizar `PaymentRequestResource::infolist()` para mostrar `total_pagado` y previews/links de `imagenes`
+- [ ] Actualizar `EditPaymentRequest` para bitácora automática en `PaymentRequestLog` por cambios de:
+  - [ ] `monto`, `total_pagado`, `observaciones_pago`, `imagenes`
+- [ ] Probar flujo completo (authorize/pago/transfer + edición de campos)
+

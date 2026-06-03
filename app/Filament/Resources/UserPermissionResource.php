@@ -52,6 +52,7 @@ class UserPermissionResource extends Resource
                         'tasks' => 'Tasks',
                         'noticias' => 'Noticias',
                         'users' => 'Users',
+                        'paymentrequests' => 'Payment Requests',
                     ])
                     ->required(),
 

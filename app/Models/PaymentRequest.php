@@ -24,11 +24,19 @@ class PaymentRequest extends Model
         'pagado_at',
         'transferido_por_id',
         'transferido_at',
+        'cancelado_at',
+        'cancelado_por_id',
+        'cancelacion_observaciones',
+        'total_pagado',
+        'observaciones_pago',
+        'imagenes',
     ];
 
     protected $casts = [
         'fecha_pago' => 'date',
         'monto' => 'decimal:2',
+        'total_pagado' => 'decimal:2',
+        'imagenes' => 'array',
     ];
 
     public function cliente(): BelongsTo
@@ -60,6 +68,12 @@ class PaymentRequest extends Model
     {
         return $this->belongsTo(User::class, 'transferido_por_id');
     }
+
+    public function canceladoPor(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'cancelado_por_id');
+    }
+
 
     public function logs(): HasMany
     {
