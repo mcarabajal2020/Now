@@ -9,11 +9,13 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Schema;
+use Illuminate\Support\Facades\Auth;
 
 class TaskForm
 {
     public static function configure(Schema $schema): Schema
     {
+        // Importante: se evalúa en runtime y requiere auth().
         return $schema
             ->components([
                 TextInput::make('titulo')
@@ -42,25 +44,24 @@ class TaskForm
                     ->disabled(fn (?Task $record): bool =>
                         // Deshabilitado si la tarea está finalizada o el usuario no pertenece al área ni es asignado
                         ($record?->estado === 'Finalizado') ||
-                        (! auth()->check()) ||
-                        (! (
-                            auth()->id() === $record?->asignado_a_id ||
+                        ! Auth::check() ||
+                        ! (
+                            Auth::id() === $record?->asignado_a_id ||
                             (
-                                ! is_null(auth()->user()?->area_id) &&
+                                ! is_null(Auth::user()?->area_id) &&
                                 ! is_null($record?->area_id) &&
-                                auth()->user()?->area_id === $record?->area_id
+                                Auth::user()?->area_id === $record?->area_id
                             )
-                        ))
+                        )
                     )
                     ->dehydrated(fn (?Task $record): bool => filled($record) && (
-                        auth()->id() === $record->asignado_a_id ||
+                            Auth::id() === $record->asignado_a_id ||
                         (
                             ! is_null(auth()->user()?->area_id) &&
                             ! is_null($record->area_id) &&
                             auth()->user()?->area_id === $record->area_id
                         )
-                    ) && $record->estado !== 'Finalizado'
-                    )
+                    ) && $record->estado !== 'Finalizado')
                     ->columnSpanFull(),
 
                 Hidden::make('estado')
@@ -90,6 +91,73 @@ class TaskForm
                     ->preload()
                     ->nullable()
                     ->helperText('Asignar este ticket a un área en lugar de a una persona'),
+
+                // -----------------
+                // Uso / tipo / prioridad
+                // -----------------
+                Select::make('tipo_uso')
+                    ->label('Tipo de uso')
+                    ->options([
+                        'uso interno' => 'Uso interno',
+                        'uso externo' => 'Uso externo',
+                    ])
+                    ->default('uso interno')
+                    ->required()
+                    ->reactive(),
+
+                Select::make('tipo_tarea')
+                    ->label('Tipo de tarea')
+                    ->options([
+                        'consulta' => 'Consulta',
+                        'cotizacion' => 'Cotización',
+                        'reclamo' => 'Reclamo',
+                        'visita_al_campo' => 'Visita al campo',
+                        'pedido' => 'Pedido',
+                        'comunicado' => 'Comunicado',
+                        'transaccion_comercial' => 'Transacción comercial',
+                        'gestion_cobranza' => 'Gestión cobranza',
+                        'apertura_siniestro' => 'Apertura siniestro',
+                        'seguimiento' => 'Seguimiento',
+                        'anticipo_financiero' => 'Anticipo financiero',
+                        'alta_seguro' => 'Alta seguro',
+                        'baja_seguro' => 'Baja seguro',
+                        'alta_telefonia' => 'Alta telefonía',
+                        'baja_telefonia' => 'Baja telefonía',
+                        'alta_fletes' => 'Alta fletes',
+                    ])
+                    ->nullable(),
+
+                Select::make('prioridad')
+                    ->label('Prioridad')
+                    ->options([
+                        'prioridad alta' => 'Prioridad alta',
+                        'prioridad baja' => 'Prioridad baja',
+                    ])
+                    ->default('prioridad alta')
+                    ->required(),
+
+                // -----------------
+                // Cliente (solo uso externo)
+                // -----------------
+                Select::make('cliente_id')
+                    ->label('Cliente')
+                    ->searchable()
+                    ->preload()
+                    ->visible(fn ($get) => ($get('tipo_uso') ?? 'uso interno') === 'uso externo')
+                    ->required(fn ($get) => ($get('tipo_uso') ?? 'uso interno') === 'uso externo')
+                    ->options(function () {
+                        // para que el select funcione como “buscar por nombre/cuenta/tag” usamos una lista paginada
+                        // (Filament internamente hace search; con preload puede ser pesado con muchos clientes)
+                        return \App\Models\Cliente::query()
+                            ->get()
+                            ->mapWithKeys(function ($c) {
+                                $tagStr = is_array($c->tags) && ! empty($c->tags) ? (' [' . implode(', ', $c->tags) . ']') : '';
+                                return [$c->id => $c->numero_cuenta.' - '.$c->nombre_cuenta.$tagStr];
+                            })
+                            ->toArray();
+                    })
+                    ->helperText('Se puede filtrar/seleccionar por número de cuenta, nombre o tags (si tiene tags).')
+                    ->reactive(),
 
                 Hidden::make('fecha_finalizacion')
                     ->nullable(),

@@ -17,6 +17,13 @@ class Task extends Model
         'asignado_a_id',
         'area_id',
         'fecha_finalizacion',
+
+        'tipo_uso',
+        'tipo_tarea',
+        'prioridad',
+
+        // Solo para uso externo
+        'cliente_id',
     ];
 
     protected $casts = [

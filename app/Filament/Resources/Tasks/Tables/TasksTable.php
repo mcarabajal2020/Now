@@ -52,17 +52,62 @@ class TasksTable
                     ->dateTime()
                     ->toggleable(),
 
+                TextColumn::make('tipo_uso')
+                    ->label('Uso')
+                    ->toggleable(),
+
+                TextColumn::make('tipo_tarea')
+                    ->label('Tipo de tarea')
+                    ->toggleable(isToggledHiddenByDefault: true),
+
+                TextColumn::make('prioridad')
+                    ->label('Prioridad')
+                    ->toggleable(),
+
+                TextColumn::make('cliente.numero_cuenta')
+                    ->label('Cliente (cuenta)')
+                    ->toggleable(isToggledHiddenByDefault: true),
+
                 TextColumn::make('ultima_modificacion')
                     ->label('Última modificación')
                     ->dateTime()
                     ->toggleable(),
             ])
             ->filters([
-                SelectFilter::make('estado')
+
+                SelectFilter::make('tipo_uso')
+                    ->label('Tipo de uso')
                     ->options([
-                        'Nuevo' => 'Nuevo',
-                        'En Proceso' => 'En Proceso',
-                        'Finalizado' => 'Finalizado',
+                        'uso interno' => 'Uso interno',
+                        'uso externo' => 'Uso externo',
+                    ]),
+
+                SelectFilter::make('tipo_tarea')
+                    ->label('Tipo de tarea')
+                    ->options([
+                        'consulta' => 'Consulta',
+                        'cotizacion' => 'Cotización',
+                        'reclamo' => 'Reclamo',
+                        'visita_al_campo' => 'Visita al campo',
+                        'pedido' => 'Pedido',
+                        'comunicado' => 'Comunicado',
+                        'transaccion_comercial' => 'Transacción comercial',
+                        'gestion_cobranza' => 'Gestión cobranza',
+                        'apertura_siniestro' => 'Apertura siniestro',
+                        'seguimiento' => 'Seguimiento',
+                        'anticipo_financiero' => 'Anticipo financiero',
+                        'alta_seguro' => 'Alta seguro',
+                        'baja_seguro' => 'Baja seguro',
+                        'alta_telefonia' => 'Alta telefonía',
+                        'baja_telefonia' => 'Baja telefonía',
+                        'alta_fletes' => 'Alta fletes',
+                    ]),
+
+                SelectFilter::make('prioridad')
+                    ->label('Prioridad')
+                    ->options([
+                        'prioridad alta' => 'Prioridad alta',
+                        'prioridad baja' => 'Prioridad baja',
                     ]),
             ])
             ->defaultSort('ultima_modificacion', 'desc')
