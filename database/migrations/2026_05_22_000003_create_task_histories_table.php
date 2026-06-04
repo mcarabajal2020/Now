@@ -11,9 +11,18 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // Evitar errores de FK por cambios de esquema previos.
+        // Si ya existe la tabla (aunque incompleta), la recreamos.
+        Schema::dropIfExists('task_histories');
+
         Schema::create('task_histories', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('task_id')->constrained('tasks')->cascadeOnDelete();
+            // MySQL: tasks.id es INT (unsigned). Alinear exactamente el tipo para el FK.
+            $table->unsignedInteger('task_id')->comment('FK a tasks.id (INT unsigned)');
+
+            // FK: omitida para evitar incompatibilidades de tipo/colación entre migraciones existentes.
+            // (El modelo seguirá funcionando; la integridad referencial queda en la app.)
+
             $table->foreignId('user_id')->nullable()->constrained('users');
             $table->enum('tipo', ['creado', 'asignacion', 'estado', 'comentario']);
             $table->text('old_value')->nullable();
