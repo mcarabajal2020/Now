@@ -216,6 +216,7 @@ class ClienteResource extends Resource
 
                             $banco = isset($map['banco']) ? ($row[$map['banco']] ?? null) : null;
                             $cbu = isset($map['cbu']) ? ($row[$map['cbu']] ?? null) : null;
+                            $tipo_cbu = isset($map['tipo_cbu']) ? ($row[$map['tipo_cbu']] ?? null) : null;
                             $observaciones = isset($map['observaciones']) ? ($row[$map['observaciones']] ?? null) : null;
 
                             if (blank($numero) || blank($nombre)) {
@@ -238,6 +239,7 @@ class ClienteResource extends Resource
 
                                         $bancoVal = blank($banco) ? null : (string) $banco;
                                         $obsVal = blank($observaciones) ? null : (string) $observaciones;
+                                        $tipoCbuVal = blank($tipo_cbu) ? null : (string) $tipo_cbu;
 
                                         if ($existingCbu->banco !== $bancoVal) {
                                             $updateData['banco'] = $bancoVal;
@@ -249,6 +251,11 @@ class ClienteResource extends Resource
                                             $needsUpdate = true;
                                         }
 
+                                        if (! is_null($tipoCbuVal) && $existingCbu->tipo_cbu !== $tipoCbuVal) {
+                                            $updateData['tipo_cbu'] = $tipoCbuVal;
+                                            $needsUpdate = true;
+                                        }
+
                                         if ($needsUpdate) {
                                             $existingCbu->update($updateData);
                                         }
@@ -257,6 +264,7 @@ class ClienteResource extends Resource
                                         $existingCliente->cbus()->create([
                                             'banco' => blank($banco) ? null : (string) $banco,
                                             'cbu' => $cbuStr,
+                                            'tipo_cbu' => blank($tipo_cbu) ? null : (string) $tipo_cbu,
                                             'observaciones' => blank($observaciones) ? null : (string) $observaciones,
                                         ]);
                                     }

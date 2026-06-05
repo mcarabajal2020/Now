@@ -134,7 +134,9 @@ La aplicación permite importar clientes desde un archivo `.csv` o `.xlsx` vía 
 - Campos opcionales para importar CBU en la misma fila:
 	- `banco` — nombre del banco.
 	- `cbu` — número de CBU.
+	- `tipo_cbu` — tipo del CBU (ej: `c/c`, `c/a`, `cbu`, `cvu`).
 	- `observaciones` — texto libre con notas.
+
 
 Reglas de importación:
 - Solo se procesan las filas que contienen ambos campos obligatorios; las filas con cualquiera de estos vacíos se saltan.
