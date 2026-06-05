@@ -5,8 +5,10 @@ namespace App\Filament\Resources\ClienteResource\RelationManagers;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
@@ -22,6 +24,19 @@ class CbusRelationManager extends RelationManager
     {
         return $schema->components([
             TextInput::make('banco')->label('Banco')->maxLength(255),
+            Select::make('tipo_cbu')
+                ->label('Tipo')
+                ->options([
+                    'c/c' => 'c/c',
+                    'c/a' => 'c/a',
+                    'cbu' => 'cbu',
+                    'cvu' => 'cvu',
+                ])
+                ->required()
+                ->searchable()
+                ->reactive()
+                ->dehydrated(true),
+
             TextInput::make('cbu')->label('CBU')->maxLength(255),
             Textarea::make('observaciones')->label('Observaciones')->columnSpanFull(),
         ]);

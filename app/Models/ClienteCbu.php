@@ -9,6 +9,7 @@ class ClienteCbu extends Model
     protected $fillable = [
         'cliente_id',
         'banco',
+        'tipo_cbu',
         'cbu',
         'observaciones',
     ];

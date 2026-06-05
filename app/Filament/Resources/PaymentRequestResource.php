@@ -118,7 +118,27 @@ class PaymentRequestResource extends Resource
 
             Select::make('cliente_cbu_id')
                 ->label('CBU')
-                ->options(fn ($get) => $get('cliente_id') ? ClienteCbu::where('cliente_id', $get('cliente_id'))->pluck('cbu', 'id') : [])
+                ->options(fn ($get) => $get('cliente_id')
+                    ? ClienteCbu::where('cliente_id', $get('cliente_id'))
+                        ->get()
+                        ->mapWithKeys(fn ($c) => [$c->id => $c->cbu.' ('.$c->tipo_cbu.')'])
+                        ->toArray()
+                    : [])
+                ->formatStateUsing(function ($state) {
+                    if (! $state) {
+                        return null;
+                    }
+
+                    $cbu = ClienteCbu::find($state);
+
+                    if (! $cbu) {
+                        return null;
+                    }
+
+                    return $cbu->cbu.' ('.$cbu->tipo_cbu.')';
+                })
+                ->native(false)
+                ->searchable()
                 ->disabled(fn (?PaymentRequest $record): bool => ! static::canUpdateRequestDetails($record))
                 ->dehydrated(fn (?PaymentRequest $record): bool => static::canUpdateRequestDetails($record))
                 ->required(),
@@ -154,6 +174,7 @@ class PaymentRequestResource extends Resource
                 ->disk('public')
                 ->directory('payment-requests')
                 ->image()
+                ->enableOpen()
                 ->maxSize(10240)
                 ->columnSpanFull()
                 ->disabled(fn (?PaymentRequest $record): bool => ! static::canUpdateRequestDetails($record))
@@ -285,6 +306,18 @@ class PaymentRequestResource extends Resource
             ])
             ->filters([
                 // Filtro solo afecta a la lista (no al formulario de creación/edición)
+                
+                \Filament\Tables\Filters\Filter::make('fecha_pago')
+                    ->form([
+                        \Filament\Forms\Components\DatePicker::make('from_fecha_pago')->label('Desde'),
+                        \Filament\Forms\Components\DatePicker::make('to_fecha_pago')->label('Hasta'),
+                    ])
+                    ->query(function (Builder $query, array $data) {
+                        return $query
+                            ->when($data['from_fecha_pago'] ?? null, fn (Builder $q, $date) => $q->whereDate('fecha_pago', '>=', $date))
+                            ->when($data['to_fecha_pago'] ?? null, fn (Builder $q, $date) => $q->whereDate('fecha_pago', '<=', $date));
+                    }),
+
                 SelectFilter::make('tag')
                     ->label('Tag de cliente')
                     ->options(fn () => 

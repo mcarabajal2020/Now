@@ -43,10 +43,10 @@ class ClienteResource extends Resource
                     ->required()
                     ->maxLength(255),
 
-                TextInput::make('tags_text')
-                    ->label('Tags')
-                    ->helperText('Separá los tags por coma. Ej: EXTERNO1, EXTERNO2')
-                    ->maxLength(2000),
+               // TextInput::make('tags_text')
+                 //   ->label('Tags')
+                 //   ->helperText('Separá los tags por coma. Ej: EXTERNO1, EXTERNO2')
+                 //   ->maxLength(2000),
 
                 // Tags son solo referencia externa; no se enganchan a ninguna otra entidad.
                 TextInput::make('tags')

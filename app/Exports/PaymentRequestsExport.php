@@ -30,6 +30,7 @@ class PaymentRequestsExport implements FromQuery, WithHeadings, WithMapping, Sho
     {
         return [
             'Número de cuenta',
+            'CBU',
             'Nombre de cuenta',
             'Monto',
             'Solicitante',
@@ -50,6 +51,8 @@ class PaymentRequestsExport implements FromQuery, WithHeadings, WithMapping, Sho
     {
         return [
             $paymentRequest->cliente?->numero_cuenta ?? $paymentRequest->numero_cuenta,
+            $paymentRequest->clienteCbu?->cbu,
+            $paymentRequest->clienteCbu?->tipo_cbu,
             $paymentRequest->cliente?->nombre_cuenta ?? $paymentRequest->nombre_cuenta,
             $paymentRequest->monto,
             $paymentRequest->solicitante?->name,
