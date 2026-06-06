@@ -57,10 +57,11 @@ class UserForm
                 TextInput::make('password')
                     ->label('Password')
                     ->password()
-                    ->dehydrateStateUsing(fn ($state) => filled($state) ? bcrypt($state) : null)
                     ->nullable()
                     ->maxLength(255)
-                    ->revealable(),
+                    ->revealable()
+                    ->dehydrated(fn ($state) => filled($state))
+                    ->dehydrateStateUsing(fn ($state) => filled($state) ? bcrypt($state) : null),
                 Toggle::make('puede_autorizar')
                     ->label('Puede autorizar pagos')
                     ->visible(fn () => auth()->user()?->role?->nombre === 'admin'),

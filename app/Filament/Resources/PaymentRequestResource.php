@@ -27,6 +27,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Storage;
 
 class PaymentRequestResource extends Resource
 {
@@ -124,19 +125,6 @@ class PaymentRequestResource extends Resource
                         ->mapWithKeys(fn ($c) => [$c->id => $c->cbu.' ('.$c->tipo_cbu.')'])
                         ->toArray()
                     : [])
-                ->formatStateUsing(function ($state) {
-                    if (! $state) {
-                        return null;
-                    }
-
-                    $cbu = ClienteCbu::find($state);
-
-                    if (! $cbu) {
-                        return null;
-                    }
-
-                    return $cbu->cbu.' ('.$cbu->tipo_cbu.')';
-                })
                 ->native(false)
                 ->searchable()
                 ->disabled(fn (?PaymentRequest $record): bool => ! static::canUpdateRequestDetails($record))
@@ -155,7 +143,7 @@ class PaymentRequestResource extends Resource
                 ->numeric()
                 ->disabled(fn (?PaymentRequest $record): bool => ! static::canUpdateRequestDetails($record))
                 ->dehydrated(fn (?PaymentRequest $record): bool => static::canUpdateRequestDetails($record))
-                ->nullable(),
+                ->required(),
 
 
             DatePicker::make('fecha_pago')->label('Fecha de pago')->native(false),
@@ -168,18 +156,71 @@ class PaymentRequestResource extends Resource
                 ->label('Observaciones (pago)')
                 ->columnSpanFull(),
 
+            \Filament\Schemas\Components\Html::make(fn () => view('filament.components.payment-request-images-preview', [
+                'images' => (function () {
+                    $id = request()->route('record');
+                    if (! $id) return [];
+                    $r = \App\Models\PaymentRequest::find($id);
+                    return $r?->imagenes ?? [];
+                })(),
+            ])->render()),
+
             FileUpload::make('imagenes')
                 ->label('Imágenes')
                 ->multiple()
                 ->disk('public')
+                ->visibility('public')
                 ->directory('payment-requests')
                 ->image()
                 ->enableOpen()
                 ->maxSize(10240)
                 ->columnSpanFull()
+                ->formatStateUsing(function ($state) {
+                    if (is_null($state)) {
+                        return null;
+                    }
+
+                    $items = is_array($state) ? $state : (array) $state;
+                    $normalized = [];
+
+                    foreach ($items as $item) {
+                        if (! is_string($item)) {
+                            $normalized[] = $item;
+                            continue;
+                        }
+
+                        // Si es una URL completa que contiene '/storage/', extraer la ruta relativa
+                        if (str_starts_with($item, 'http')) {
+                            $path = parse_url($item, PHP_URL_PATH) ?: $item;
+                            if (str_contains($path, '/storage/')) {
+                                $rel = ltrim(substr($path, strpos($path, '/storage/') + strlen('/storage/')), '/');
+                                // Construir URL con host actual para evitar 'http://localhost' incorrecto
+                                $host = request()?->getSchemeAndHttpHost() ?: rtrim(config('filesystems.disks.public.url'), '/');
+                                $normalized[] = $host.'/storage/'.$rel;
+                                continue;
+                            }
+                        }
+
+                        // Si la cadena contiene '/storage/' aunque no sea URL
+                        if (str_contains($item, '/storage/')) {
+                            $rel = ltrim(substr($item, strpos($item, '/storage/') + strlen('/storage/')), '/');
+                            $host = request()?->getSchemeAndHttpHost() ?: rtrim(config('filesystems.disks.public.url'), '/');
+                            $normalized[] = $host.'/storage/'.$rel;
+                            continue;
+                        }
+
+                        // Construir URL relativa desde la ruta almacenada
+                        $host = request()?->getSchemeAndHttpHost() ?: rtrim(config('filesystems.disks.public.url'), '/');
+                        $normalized[] = $host.'/storage/'.ltrim($item, '/');
+                    }
+
+                    return $normalized;
+                })
                 ->disabled(fn (?PaymentRequest $record): bool => ! static::canUpdateRequestDetails($record))
                 ->dehydrated(fn (?PaymentRequest $record): bool => static::canUpdateRequestDetails($record))
                 ->preserveFilenames(),
+            // Script para permitir pegar imágenes desde el portapapeles
+            \Filament\Schemas\Components\Html::make(fn () => view('filament.components.clipboard-paste-upload')->render()),
         ]);
     }
 

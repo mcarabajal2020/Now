@@ -7,11 +7,16 @@ use App\Filament\Resources\ClienteResource\RelationManagers\CbusRelationManager;
 use App\Models\Cliente;
 use BackedEnum;
 use Filament\Actions\Action;
+use App\Models\Task;
+use App\Models\PaymentRequest;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
+use Filament\Schemas\Components\Tabs as SchemaTabs;
+use Filament\Schemas\Components\Tabs\Tab as SchemaTab;
+use Filament\Schemas\Components\Html as SchemaHtml;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
@@ -110,11 +115,54 @@ class ClienteResource extends Resource
             ])
             ->recordActions([
                 EditAction::make(),
+                    Action::make('historial')
+                        ->label('Historial')
+                        ->icon('heroicon-o-clock')
+                        ->modalHeading('Historial del cliente')
+                        ->modalWidth('lg')
+                        ->schema([
+                            SchemaTabs::make()
+                                ->tabs([
+                                    SchemaTab::make('tareas')
+                                        ->label('Tareas')
+                                        ->schema([
+                                            SchemaHtml::make(fn () => view('filament.pages.historial-tabs-tareas', [
+                                                'tasks' => Task::query()->where('cliente_id', request()->route('record') ?? null)->orderByDesc('ultima_modificacion')->orderByDesc('fecha_creacion')->get()->map(fn ($task) => [
+                                                    'id' => $task->id,
+                                                    'titulo' => $task->titulo,
+                                                    'detalle' => $task->detalle,
+                                                    'estado' => $task->estado,
+                                                    'fecha' => $task->ultima_modificacion ?? $task->fecha_creacion,
+                                                    'url' => \App\Filament\Resources\Tasks\TaskResource::getUrl('edit', ['record' => $task->id]),
+                                                ]),
+                                            ])->render()),
+                                        ]),
+
+                                    SchemaTab::make('fondos')
+                                        ->label('Pedidos de fondos')
+                                        ->schema([
+                                            SchemaHtml::make(fn () => view('filament.pages.historial-tabs-fondos', [
+                                                'payments' => PaymentRequest::query()->where('cliente_id', request()->route('record') ?? null)->orderByDesc('fecha_pago')->orderByDesc('created_at')->get()->map(fn ($p) => [
+                                                    'id' => $p->id,
+                                                    'titulo' => 'Pedido de fondos',
+                                                    'detalle' => $p->observaciones,
+                                                    'estado' => $p->estado,
+                                                    'fecha' => $p->fecha_pago ?? $p->created_at,
+                                                    'importe_pagado' => $p->total_pagado ?? $p->monto ?? null,
+                                                    'url' => \App\Filament\Resources\PaymentRequestResource::getUrl('view', ['record' => $p->id]),
+                                                ]),
+                                            ])->render()),
+                                        ]),
+                                ])
+                                ->persistTabInQueryString('tab'),
+                        ]),
             ])
             ->toolbarActions([
                 Action::make('import')
                     ->label('Importar clientes')
                     ->icon('heroicon-o-cloud-arrow-up')
+                    ->tooltip('Parámetros de importación: columnas requeridas: numero_cuenta, nombre_cuenta. Opcionales: banco, cbu, observaciones. Formatos: .csv, .xlsx. Codificación: UTF-8. Separador CSV: coma.')
+                    ->extraAttributes(['title' => 'Parámetros de importación: columnas requeridas: numero_cuenta, nombre_cuenta. Opcionales: banco, cbu, observaciones. Formatos: .csv, .xlsx. Codificación: UTF-8. Separador CSV: coma.'])
                     ->form([
                         FileUpload::make('file')
                             ->label('Archivo (.csv o .xlsx)')
@@ -304,6 +352,15 @@ class ClienteResource extends Resource
             'index' => Pages\ListClientes::route('/'),
             'create' => Pages\CreateCliente::route('/create'),
             'edit' => Pages\EditCliente::route('/{record}/edit'),
+            // Historial del cliente (tareas + pedidos de fondos)
+            'historial' => Pages\HistorialClientes::route('/{record}/historial'),
+
+
+
+
+
+
+
         ];
     }
 }

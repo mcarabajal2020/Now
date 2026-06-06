@@ -18,9 +18,12 @@ class Task extends Model
         'area_id',
         'fecha_finalizacion',
 
+        // Estas columnas existen en migración 2026_06_04_000000_add_tipo_uso_tarea_prioridad_to_tasks_table.php.
+        // Si el esquema aún no está aplicado en el entorno destino, Laravel fallará al hacer insert/update.
         'tipo_uso',
         'tipo_tarea',
         'prioridad',
+
 
         // Solo para uso externo
         'cliente_id',
