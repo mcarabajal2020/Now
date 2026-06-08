@@ -5,6 +5,8 @@ namespace App\Filament\Resources\Tasks\Pages;
 use App\Filament\Resources\Tasks\TaskResource;
 use App\Models\User;
 use Filament\Actions\Action;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
 use Filament\Actions\DeleteAction;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
@@ -88,7 +90,7 @@ class EditTask extends EditRecord
         }
     }
 
-    public function finalize(): void
+    public function finalize(?string $tipoCierre = null, ?string $comentarioCierre = null): void
     {
         if (! $this->isAssignedToCurrentUser() || $this->record->estado === 'Finalizado') {
             abort(403);
@@ -101,6 +103,27 @@ class EditTask extends EditRecord
             'fecha_finalizacion' => now(),
             'ultima_modificacion' => now(),
         ]);
+
+        // Registrar tipo de cierre en el historial
+        $tipoLabel = null;
+        if ($tipoCierre) {
+            $map = [
+                'gestion_exitosa' => 'Gestión exitosa',
+                'venta_exitosa' => 'Venta exitosa',
+                'pedido_terminado' => 'Pedido terminado',
+                'cobranza_exitosa' => 'Cobranza exitosa',
+            ];
+
+            $tipoLabel = $map[$tipoCierre] ?? $tipoCierre;
+
+            $this->record->histories()->create([
+                'user_id' => auth()->id(),
+                'tipo' => 'finalizacion',
+                'old_value' => (string) $this->record->estado,
+                'new_value' => 'Finalizado',
+                'comentario' => trim(($tipoLabel ? "Tipo cierre: {$tipoLabel}. " : '').($comentarioCierre ?? '')),
+            ]);
+        }
 
         Notification::make()
             ->success()
@@ -131,11 +154,26 @@ class EditTask extends EditRecord
         return Action::make('finalize')
             ->label('Finalizar')
             ->color('success')
-            ->requiresConfirmation()
             ->modalHeading('Finalizar tarea')
-            ->modalDescription('La tarea pasará a Finalizado y se registrará la fecha de finalización.')
+            ->modalDescription('La tarea pasará a Finalizado. Seleccioná el tipo de cierre y opcionalmente dejá un comentario.')
             ->modalSubmitActionLabel('Finalizar')
-            ->action(fn (): null => $this->finalize())
+            ->form([
+                Select::make('tipo_cierre')
+                    ->label('Tipo de cierre')
+                    ->options([
+                        'gestion_exitosa' => 'Gestión exitosa',
+                        'venta_exitosa' => 'Venta exitosa',
+                        'pedido_terminado' => 'Pedido terminado',
+                        'cobranza_exitosa' => 'Cobranza exitosa',
+                    ])
+                    ->required(),
+
+                Textarea::make('comentario')
+                    ->label('Comentario (opcional)')
+                    ->rows(3)
+                    ->maxLength(2000),
+            ])
+            ->action(fn (array $data): null => $this->finalize($data['tipo_cierre'] ?? null, $data['comentario'] ?? null))
             ->visible(fn (): bool => $this->isAssignedToCurrentUser() && $this->record->estado !== 'Finalizado');
     }
 

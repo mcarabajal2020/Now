@@ -62,6 +62,12 @@ class TasksTable
 
                 TextColumn::make('prioridad')
                     ->label('Prioridad')
+                    ->badge()
+                    ->color(fn (?string $state): string => match ($state) {
+                        'prioridad alta' => 'danger',
+                        'prioridad baja' => 'gray',
+                        default => 'secondary',
+                    })
                     ->toggleable(),
 
                 TextColumn::make('cliente.numero_cuenta')

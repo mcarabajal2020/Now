@@ -78,6 +78,10 @@ Esto creará usuarios de prueba:
 - **Editor**: editor@test.com / password
 - **Viewer**: viewer@test.com / password
 
+En caso de no crearse los usuarios ejecutar de manera manual 
+
+php artisan db:seed --class=PermissionSeeder
+
 ### 7. Instalar dependencias de Node.js
 
 ```bash
