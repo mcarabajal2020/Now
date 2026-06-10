@@ -271,19 +271,14 @@ class PaymentRequestResource extends Resource
                         ->label('Observaciones (pago)')
                         ->columnSpanFull(),
 
-                    TextEntry::make('imagenes')
-                        ->label('Imágenes')
-                        ->formatStateUsing(function ($state) {
-                            $items = is_array($state) ? $state : (is_null($state) ? [] : (array) $state);
-                            $items = array_values(array_filter($items));
-
-                            if (empty($items)) {
-                                return null;
-                            }
-
-                            // Mostrar separadas por salto; Filament la renderiza como texto.
-                            return implode("\n", array_map(fn ($p) => (string) $p, $items));
-                        })
+                    \Filament\Schemas\Components\Html::make(fn () => view('filament.components.payment-request-images-preview', [
+                        'images' => (function () {
+                            $id = request()->route('record');
+                            if (! $id) return [];
+                            $r = \App\Models\PaymentRequest::find($id);
+                            return $r?->imagenes ?? [];
+                        })(),
+                    ])->render())
                         ->columnSpanFull(),
                 ])
                 ->columns(2),
