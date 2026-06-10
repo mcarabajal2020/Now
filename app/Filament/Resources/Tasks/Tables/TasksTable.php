@@ -7,7 +7,10 @@ use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Filters\Filter;
+use Illuminate\Database\Eloquent\Builder;
 use Filament\Tables\Table;
+use Filament\Forms\Components\TextInput;
 
 class TasksTable
 {
@@ -72,6 +75,7 @@ class TasksTable
 
                 TextColumn::make('cliente.numero_cuenta')
                     ->label('Cliente (cuenta)')
+                    ->getStateUsing(fn ($record) => $record->cliente ? ($record->cliente->numero_cuenta . ' — ' . $record->cliente->nombre_cuenta) : null)
                     ->toggleable(isToggledHiddenByDefault: true),
 
                 TextColumn::make('ultima_modificacion')
@@ -80,6 +84,25 @@ class TasksTable
                     ->toggleable(),
             ])
             ->filters([
+                // Filtro de búsqueda por cliente (nombre, número, tags)
+                Filter::make('cliente_search')
+                    ->label('Buscar cliente')
+                    ->form([
+                        TextInput::make('cliente_search')
+                            ->label('Nombre, número o tag')
+                            ->placeholder('Ej: DIETZ, 1169, 45'),
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        if (empty($data['cliente_search'])) {
+                            return $query;
+                        }
+                        $search = trim($data['cliente_search']);
+                        return $query->whereHas('cliente', function (Builder $q) use ($search) {
+                            $q->where('nombre_cuenta', 'like', "%{$search}%")
+                              ->orWhere('numero_cuenta', 'like', "%{$search}%")
+                              ->orWhereRaw('JSON_CONTAINS(tags, ?)', [json_encode((string) $search)]);
+                        });
+                    }),
 
                 SelectFilter::make('tipo_uso')
                     ->label('Tipo de uso')
