@@ -18,12 +18,22 @@ class PermissionSeeder extends Seeder
             ['recurso' => 'tasks', 'accion' => 'ver'],
             ['recurso' => 'tasks', 'accion' => 'editar'],
             ['recurso' => 'tasks', 'accion' => 'eliminar'],
+
             ['recurso' => 'noticias', 'accion' => 'ver'],
             ['recurso' => 'noticias', 'accion' => 'editar'],
             ['recurso' => 'noticias', 'accion' => 'eliminar'],
+
             ['recurso' => 'users', 'accion' => 'ver'],
             ['recurso' => 'users', 'accion' => 'editar'],
             ['recurso' => 'users', 'accion' => 'eliminar'],
+
+            ['recurso' => 'tipo_tareas', 'accion' => 'ver'],
+            ['recurso' => 'tipo_tareas', 'accion' => 'editar'],
+            ['recurso' => 'tipo_tareas', 'accion' => 'eliminar'],
+
+            ['recurso' => 'tipo_cierres', 'accion' => 'ver'],
+            ['recurso' => 'tipo_cierres', 'accion' => 'editar'],
+            ['recurso' => 'tipo_cierres', 'accion' => 'eliminar'],
         ];
 
         foreach ($permisos as $permiso) {

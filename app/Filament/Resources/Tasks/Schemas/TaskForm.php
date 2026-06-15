@@ -105,27 +105,13 @@ class TaskForm
                     ->required()
                     ->reactive(),
 
-                Select::make('tipo_tarea')
+                Select::make('tipo_tarea_id')
                     ->label('Tipo de tarea')
-                    ->options([
-                        'consulta' => 'Consulta',
-                        'cotizacion' => 'Cotización',
-                        'reclamo' => 'Reclamo',
-                        'visita_al_campo' => 'Visita al campo',
-                        'pedido' => 'Pedido',
-                        'comunicado' => 'Comunicado',
-                        'transaccion_comercial' => 'Transacción comercial',
-                        'gestion_cobranza' => 'Gestión cobranza',
-                        'apertura_siniestro' => 'Apertura siniestro',
-                        'seguimiento' => 'Seguimiento',
-                        'anticipo_financiero' => 'Anticipo financiero',
-                        'alta_seguro' => 'Alta seguro',
-                        'baja_seguro' => 'Baja seguro',
-                        'alta_telefonia' => 'Alta telefonía',
-                        'baja_telefonia' => 'Baja telefonía',
-                        'alta_fletes' => 'Alta fletes',
-                    ])
+                    ->relationship('tipoTarea', 'nombre')
+                    ->searchable()
+                    ->preload()
                     ->nullable(),
+
 
                 Select::make('prioridad')
                     ->label('Prioridad')

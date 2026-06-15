@@ -21,9 +21,13 @@ class Task extends Model
         // Estas columnas existen en migración 2026_06_04_000000_add_tipo_uso_tarea_prioridad_to_tasks_table.php.
         // Si el esquema aún no está aplicado en el entorno destino, Laravel fallará al hacer insert/update.
         'tipo_uso',
-        'tipo_tarea',
-        'prioridad',
 
+        // Tipos relacionales
+        'tipo_tarea_id',
+        'tipo_cierre_id',
+
+        // Prioridad sigue siendo string
+        'prioridad',
 
         // Solo para uso externo
         'cliente_id',
@@ -48,6 +52,16 @@ class Task extends Model
     public function area()
     {
         return $this->belongsTo(Area::class, 'area_id');
+    }
+
+    public function tipoTarea()
+    {
+        return $this->belongsTo(TipoTarea::class, 'tipo_tarea_id');
+    }
+
+    public function tipoCierre()
+    {
+        return $this->belongsTo(TipoCierre::class, 'tipo_cierre_id');
     }
 
     public function histories()

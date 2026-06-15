@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Users\Schemas;
 
+use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
@@ -47,12 +48,10 @@ class UserForm
                     ->preload()
                     ->nullable(),
 
-                Select::make('area_id')
-                    ->label('Área')
-                    ->relationship('area', 'nombre')
-                    ->searchable()
-                    ->preload()
-                    ->nullable(),
+                CheckboxList::make('areas')
+                    ->label('Áreas')
+                    ->relationship('areas', 'nombre')
+                    ->searchable(),
 
                 TextInput::make('password')
                     ->label('Password')

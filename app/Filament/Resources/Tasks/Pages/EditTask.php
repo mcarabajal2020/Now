@@ -90,8 +90,9 @@ class EditTask extends EditRecord
         }
     }
 
-    public function finalize(?string $tipoCierre = null, ?string $comentarioCierre = null): void
+    public function finalize(?int $tipoCierreId = null, ?string $comentarioCierre = null): void
     {
+
         if (! $this->isAssignedToCurrentUser() || $this->record->estado === 'Finalizado') {
             abort(403);
         }
@@ -105,16 +106,8 @@ class EditTask extends EditRecord
         ]);
 
         // Registrar tipo de cierre en el historial
-        $tipoLabel = null;
-        if ($tipoCierre) {
-            $map = [
-                'gestion_exitosa' => 'Gestión exitosa',
-                'venta_exitosa' => 'Venta exitosa',
-                'pedido_terminado' => 'Pedido terminado',
-                'cobranza_exitosa' => 'Cobranza exitosa',
-            ];
-
-            $tipoLabel = $map[$tipoCierre] ?? $tipoCierre;
+        if ($tipoCierreId) {
+            $tipoLabel = $this->record->tipoCierre?->nombre;
 
             $this->record->histories()->create([
                 'user_id' => auth()->id(),
@@ -124,6 +117,7 @@ class EditTask extends EditRecord
                 'comentario' => trim(($tipoLabel ? "Tipo cierre: {$tipoLabel}. " : '').($comentarioCierre ?? '')),
             ]);
         }
+
 
         Notification::make()
             ->success()
@@ -136,9 +130,59 @@ class EditTask extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
+            Action::make('take_task')
+                ->label('Tomar tarea')
+                ->icon('heroicon-o-hand-raised')
+                ->color('primary')
+                ->visible(fn (): bool => $this->canTakeTask())
+                ->action(function (): void {
+                    $this->record->update([
+                        'asignado_a_id' => auth()->id(),
+                        'ultima_modificacion' => now(),
+                        'estado' => $this->record->estado === 'Nuevo' ? 'En Proceso' : $this->record->estado,
+                    ]);
+
+                    $this->record->histories()->create([
+                        'user_id' => auth()->id(),
+                        'tipo' => 'asignacion',
+                        'old_value' => (string) $this->previousAssignedUserId,
+                        'new_value' => (string) $this->record->asignado_a_id,
+                        'comentario' => 'Tarea tomada por el usuario logueado',
+                    ]);
+
+                    $this->sendAssignedTaskNotification($this->record->asignado_a_id);
+
+                    $this->record->refresh();
+                }),
+
             DeleteAction::make(),
         ];
     }
+
+    private function canTakeTask(): bool
+    {
+        $user = auth()->user();
+
+        if (! $user || ! $this->record) {
+            return false;
+        }
+
+        if ($this->isAssignedToCurrentUser()) {
+            return false;
+        }
+
+        if ($this->record->estado === 'Finalizado') {
+            return false;
+        }
+
+        if (! $this->record->area_id || ! $user->area_id) {
+            return false;
+        }
+
+        return $user->area_id === $this->record->area_id;
+    }
+
+
 
     protected function getFormActions(): array
     {
@@ -158,22 +202,21 @@ class EditTask extends EditRecord
             ->modalDescription('La tarea pasará a Finalizado. Seleccioná el tipo de cierre y opcionalmente dejá un comentario.')
             ->modalSubmitActionLabel('Finalizar')
             ->form([
-                Select::make('tipo_cierre')
+                Select::make('tipo_cierre_id')
                     ->label('Tipo de cierre')
-                    ->options([
-                        'gestion_exitosa' => 'Gestión exitosa',
-                        'venta_exitosa' => 'Venta exitosa',
-                        'pedido_terminado' => 'Pedido terminado',
-                        'cobranza_exitosa' => 'Cobranza exitosa',
-                    ])
+                    ->relationship('tipoCierre', 'nombre')
+                    ->searchable()
+                    ->preload()
                     ->required(),
+
 
                 Textarea::make('comentario')
                     ->label('Comentario (opcional)')
                     ->rows(3)
                     ->maxLength(2000),
             ])
-            ->action(fn (array $data): null => $this->finalize($data['tipo_cierre'] ?? null, $data['comentario'] ?? null))
+            ->action(fn (array $data): null => $this->finalize($data['tipo_cierre_id'] ?? null, $data['comentario'] ?? null))
+
             ->visible(fn (): bool => $this->isAssignedToCurrentUser() && $this->record->estado !== 'Finalizado');
     }
 

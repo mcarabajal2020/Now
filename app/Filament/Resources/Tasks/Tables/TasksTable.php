@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Tasks\Tables;
 
+use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -11,6 +12,7 @@ use Filament\Tables\Filters\Filter;
 use Illuminate\Database\Eloquent\Builder;
 use Filament\Tables\Table;
 use Filament\Forms\Components\TextInput;
+use Filament\Support\Icons\Heroicon;
 
 class TasksTable
 {
@@ -59,9 +61,10 @@ class TasksTable
                     ->label('Uso')
                     ->toggleable(),
 
-                TextColumn::make('tipo_tarea')
+                TextColumn::make('tipoTarea.nombre')
                     ->label('Tipo de tarea')
                     ->toggleable(isToggledHiddenByDefault: true),
+
 
                 TextColumn::make('prioridad')
                     ->label('Prioridad')
@@ -111,26 +114,20 @@ class TasksTable
                         'uso externo' => 'Uso externo',
                     ]),
 
-                SelectFilter::make('tipo_tarea')
+                SelectFilter::make('tipo_tarea_id')
                     ->label('Tipo de tarea')
-                    ->options([
-                        'consulta' => 'Consulta',
-                        'cotizacion' => 'Cotización',
-                        'reclamo' => 'Reclamo',
-                        'visita_al_campo' => 'Visita al campo',
-                        'pedido' => 'Pedido',
-                        'comunicado' => 'Comunicado',
-                        'transaccion_comercial' => 'Transacción comercial',
-                        'gestion_cobranza' => 'Gestión cobranza',
-                        'apertura_siniestro' => 'Apertura siniestro',
-                        'seguimiento' => 'Seguimiento',
-                        'anticipo_financiero' => 'Anticipo financiero',
-                        'alta_seguro' => 'Alta seguro',
-                        'baja_seguro' => 'Baja seguro',
-                        'alta_telefonia' => 'Alta telefonía',
-                        'baja_telefonia' => 'Baja telefonía',
-                        'alta_fletes' => 'Alta fletes',
-                    ]),
+                    ->options(
+                        \App\Models\TipoTarea::query()->pluck('nombre', 'id')->toArray()
+                    )
+                    ->query(function (Builder $query, array $data): Builder {
+                        if (empty($data['tipo_tarea_id'])) {
+                            return $query;
+                        }
+
+                        return $query->where('tipo_tarea_id', $data['tipo_tarea_id']);
+                    }),
+
+
 
                 SelectFilter::make('prioridad')
                     ->label('Prioridad')
@@ -146,6 +143,15 @@ class TasksTable
 
             ->recordActions([
                 EditAction::make(),
+                
+                Action::make('assignToMe')
+                    ->label('Asignarme')
+                    ->icon(Heroicon::OutlinedCheckCircle)
+                    ->color('success')
+                    ->action(function ($record) {
+                        $record->update(['asignado_a_id' => auth()->id()]);
+                    })
+                    ->visible(fn ($record) => $record->asignado_a_id !== auth()->id()),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

@@ -53,6 +53,8 @@ class UserPermissionResource extends Resource
                         'noticias' => 'Noticias',
                         'users' => 'Users',
                         'paymentrequests' => 'Payment Requests',
+                        'tipo_cierres' => 'Tipo Cierres',
+                        'tipo_tareas' => 'Tipo Tareas',
                     ])
                     ->required(),
 
@@ -96,6 +98,9 @@ class UserPermissionResource extends Resource
                         'tasks' => 'Tasks',
                         'noticias' => 'Noticias',
                         'users' => 'Users',
+                        'paymentrequests' => 'Payment Requests',
+                        'tipo_cierres' => 'Tipo Cierres',
+                        'tipo_tareas' => 'Tipo Tareas',
                     ]),
             ])
 

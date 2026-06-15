@@ -45,6 +45,8 @@ class PermissionResource extends Resource
                         'tasks' => 'Tasks',
                         'noticias' => 'Noticias',
                         'users' => 'Users',
+                        'tipo_cierres' => 'Tipo Cierres',
+                        'tipo_tareas' => 'Tipo Tareas',
                     ])
                     ->required(),
 
