@@ -3,7 +3,6 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\TipoTareaResource\Pages;
-use App\Filament\Traits\AuthorizedResource;
 use App\Models\TipoTarea;
 use BackedEnum;
 use Filament\Resources\Resource;
@@ -14,9 +13,45 @@ use Filament\Tables\Table;
 
 class TipoTareaResource extends Resource
 {
-    use AuthorizedResource;
-
     protected static ?string $model = TipoTarea::class;
+
+    public static function canViewAny(): bool
+    {
+        /** @var \App\Models\User|null $user */
+        $user = auth()->user();
+
+        if (! $user) {
+            return false;
+        }
+
+        if ($user->role?->nombre === 'admin') {
+            return true;
+        }
+
+        return $user->role?->permissions()
+            ->where('recurso', 'tipo_tareas')
+            ->where('accion', 'ver')
+            ->exists() ?? false;
+    }
+
+    public static function canCreate(): bool
+    {
+        /** @var \App\Models\User|null $user */
+        $user = auth()->user();
+
+        if (! $user) {
+            return false;
+        }
+
+        if ($user->role?->nombre === 'admin') {
+            return true;
+        }
+
+        return $user->role?->permissions()
+            ->where('recurso', 'tipo_tareas')
+            ->where('accion', 'editar')
+            ->exists() ?? false;
+    }
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::ClipboardDocumentList;
 

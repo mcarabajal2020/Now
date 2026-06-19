@@ -2,7 +2,6 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Traits\AuthorizedResource;
 use App\Models\TipoCierre;
 use BackedEnum;
 use Filament\Resources\Resource;
@@ -13,9 +12,45 @@ use Filament\Tables\Table;
 
 class TipoCierreResource extends Resource
 {
-    use AuthorizedResource;
-
     protected static ?string $model = TipoCierre::class;
+
+    public static function canViewAny(): bool
+    {
+        /** @var \App\Models\User|null $user */
+        $user = auth()->user();
+
+        if (! $user) {
+            return false;
+        }
+
+        if ($user->role?->nombre === 'admin') {
+            return true;
+        }
+
+        return $user->role?->permissions()
+            ->where('recurso', 'tipo_cierres')
+            ->where('accion', 'ver')
+            ->exists() ?? false;
+    }
+
+    public static function canCreate(): bool
+    {
+        /** @var \App\Models\User|null $user */
+        $user = auth()->user();
+
+        if (! $user) {
+            return false;
+        }
+
+        if ($user->role?->nombre === 'admin') {
+            return true;
+        }
+
+        return $user->role?->permissions()
+            ->where('recurso', 'tipo_cierres')
+            ->where('accion', 'editar')
+            ->exists() ?? false;
+    }
 
     protected static ?string $navigationLabel = 'Tipos de cierre';
 
