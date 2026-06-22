@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\PaymentRequestResource\Pages;
 use App\Filament\Resources\PaymentRequestResource\RelationManagers\LogsRelationManager;
+use App\Filament\Traits\AuthorizedResource;
 use App\Models\Cliente;
 use App\Models\ClienteCbu;
 use App\Models\PaymentRequest;
@@ -14,16 +15,18 @@ use Filament\Actions\Action;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\FileUpload;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Html;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
@@ -31,13 +34,24 @@ use Illuminate\Support\Facades\Storage;
 
 class PaymentRequestResource extends Resource
 {
+    use AuthorizedResource;
+
     protected static ?string $model = PaymentRequest::class;
 
     protected static ?string $navigationLabel = 'Pedidos de fondos';
 
+    protected static ?string $modelLabel = 'Pedido de fondos';
+
+    protected static ?string $pluralModelLabel = 'Pedidos de fondos';
+
     protected static string|BackedEnum|null $navigationIcon = Heroicon::CurrencyDollar;
 
     protected static ?int $navigationSort = 3;
+
+    protected static function getPermissionKey(): string
+    {
+        return 'paymentrequests';
+    }
 
     public static function getEloquentQuery(): Builder
     {
@@ -145,7 +159,6 @@ class PaymentRequestResource extends Resource
                 ->dehydrated(fn (?PaymentRequest $record): bool => static::canUpdateRequestDetails($record))
                 ->required(),
 
-
             DatePicker::make('fecha_pago')->label('Fecha de pago')->native(false),
 
             Textarea::make('observaciones')
@@ -156,11 +169,14 @@ class PaymentRequestResource extends Resource
                 ->label('Observaciones (pago)')
                 ->columnSpanFull(),
 
-            \Filament\Schemas\Components\Html::make(fn () => view('filament.components.payment-request-images-preview', [
+            Html::make(fn () => view('filament.components.payment-request-images-preview', [
                 'images' => (function () {
                     $id = request()->route('record');
-                    if (! $id) return [];
-                    $r = \App\Models\PaymentRequest::find($id);
+                    if (! $id) {
+                        return [];
+                    }
+                    $r = PaymentRequest::find($id);
+
                     return $r?->imagenes ?? [];
                 })(),
             ])->render()),
@@ -186,6 +202,7 @@ class PaymentRequestResource extends Resource
                     foreach ($items as $item) {
                         if (! is_string($item)) {
                             $normalized[] = $item;
+
                             continue;
                         }
 
@@ -197,6 +214,7 @@ class PaymentRequestResource extends Resource
                                 // Construir URL con host actual para evitar 'http://localhost' incorrecto
                                 $host = request()?->getSchemeAndHttpHost() ?: rtrim(config('filesystems.disks.public.url'), '/');
                                 $normalized[] = $host.'/storage/'.$rel;
+
                                 continue;
                             }
                         }
@@ -206,6 +224,7 @@ class PaymentRequestResource extends Resource
                             $rel = ltrim(substr($item, strpos($item, '/storage/') + strlen('/storage/')), '/');
                             $host = request()?->getSchemeAndHttpHost() ?: rtrim(config('filesystems.disks.public.url'), '/');
                             $normalized[] = $host.'/storage/'.$rel;
+
                             continue;
                         }
 
@@ -220,7 +239,7 @@ class PaymentRequestResource extends Resource
                 ->dehydrated(fn (?PaymentRequest $record): bool => static::canUpdateRequestDetails($record))
                 ->preserveFilenames(),
             // Script para permitir pegar imágenes desde el portapapeles
-            \Filament\Schemas\Components\Html::make(fn () => view('filament.components.clipboard-paste-upload')->render()),
+            Html::make(fn () => view('filament.components.clipboard-paste-upload')->render()),
         ]);
     }
 
@@ -237,7 +256,7 @@ class PaymentRequestResource extends Resource
                         ->label('Nombre de cuenta')
                         ->getStateUsing(fn (PaymentRequest $record): ?string => $record->cliente?->nombre_cuenta ?? $record->nombre_cuenta),
 
-                TextEntry::make('clienteCbu.cbu')
+                    TextEntry::make('clienteCbu.cbu')
                         ->label('CBU'),
 
                     TextEntry::make('estado')
@@ -246,7 +265,7 @@ class PaymentRequestResource extends Resource
                             'pendiente_autorizacion' => 'Pendiente autorización',
                             'pendiente_pago' => 'Pendiente pago',
                             'pendiente_transferencia' => 'Pendiente transferencia',
-                        'terminado' => 'Terminado',
+                            'terminado' => 'Terminado',
                             'cancelado' => 'Cancelado',
                             default => $state,
                         }),
@@ -254,7 +273,6 @@ class PaymentRequestResource extends Resource
                     TextEntry::make('monto')
                         ->label('Monto solicitado')
                         ->formatStateUsing(fn ($state): ?string => is_null($state) ? null : (number_format((float) $state, 2, ',', '.').' ARS')),
-
 
                     TextEntry::make('total_pagado')
                         ->label('Total pagado')
@@ -271,11 +289,14 @@ class PaymentRequestResource extends Resource
                         ->label('Observaciones (pago)')
                         ->columnSpanFull(),
 
-                    \Filament\Schemas\Components\Html::make(fn () => view('filament.components.payment-request-images-preview', [
+                    Html::make(fn () => view('filament.components.payment-request-images-preview', [
                         'images' => (function () {
                             $id = request()->route('record');
-                            if (! $id) return [];
-                            $r = \App\Models\PaymentRequest::find($id);
+                            if (! $id) {
+                                return [];
+                            }
+                            $r = PaymentRequest::find($id);
+
                             return $r?->imagenes ?? [];
                         })(),
                     ])->render())
@@ -338,15 +359,15 @@ class PaymentRequestResource extends Resource
                 TextColumn::make('autorizadoPor.name')->label('Autorizó')->sortable(),
                 TextColumn::make('pagadoPor.name')->label('Pagó')->sortable(),
                 TextColumn::make('transferidoPor.name')->label('Transfirió')->sortable(),
-            
+
             ])
             ->filters([
                 // Filtro solo afecta a la lista (no al formulario de creación/edición)
-                
-                \Filament\Tables\Filters\Filter::make('fecha_pago')
+
+                Filter::make('fecha_pago')
                     ->form([
-                        \Filament\Forms\Components\DatePicker::make('from_fecha_pago')->label('Desde'),
-                        \Filament\Forms\Components\DatePicker::make('to_fecha_pago')->label('Hasta'),
+                        DatePicker::make('from_fecha_pago')->label('Desde'),
+                        DatePicker::make('to_fecha_pago')->label('Hasta'),
                     ])
                     ->query(function (Builder $query, array $data) {
                         return $query
@@ -356,16 +377,15 @@ class PaymentRequestResource extends Resource
 
                 SelectFilter::make('tag')
                     ->label('Tag de cliente')
-                    ->options(fn () => 
-                        Cliente::query()
-                            ->whereNotNull('tags')
-                            ->get()
-                            ->flatMap(fn ($c) => (array) $c->tags)
-                            ->unique()
-                            ->sort()
-                            ->values()
-                            ->mapWithKeys(fn ($t) => [$t => $t])
-                            ->toArray()
+                    ->options(fn () => Cliente::query()
+                        ->whereNotNull('tags')
+                        ->get()
+                        ->flatMap(fn ($c) => (array) $c->tags)
+                        ->unique()
+                        ->sort()
+                        ->values()
+                        ->mapWithKeys(fn ($t) => [$t => $t])
+                        ->toArray()
                     )
                     ->query(function (Builder $query, array $data) {
                         $value = $data['value'] ?? null;
@@ -378,7 +398,7 @@ class PaymentRequestResource extends Resource
                             $q->whereJsonContains('tags', $value);
                         });
                     }),
-                
+
                 SelectFilter::make('estado')
                     ->label('Estado')
                     ->options([
@@ -389,7 +409,7 @@ class PaymentRequestResource extends Resource
                     ]),
             ])
             ->recordActions([
-                ViewAction::make(),
+                ViewAction::make()->label('Ver'),
 
                 Action::make('authorize')
                     ->label('Autorizar')
@@ -471,6 +491,7 @@ class PaymentRequestResource extends Resource
                     }),
 
                 EditAction::make()
+                    ->label('Editar')
                     ->visible(fn (PaymentRequest $record): bool => ! in_array($record->estado, ['terminado', 'cancelado'], true)),
             ]);
     }

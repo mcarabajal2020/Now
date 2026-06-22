@@ -31,10 +31,17 @@ class HistoriesRelationManager extends RelationManager
                         'warning' => 'estado',
                         'success' => 'comentario',
                     ])
+                    ->formatStateUsing(fn (?string $state): string => match ($state) {
+                        'creado' => 'Creado',
+                        'asignacion' => 'Asignación',
+                        'estado' => 'Cambio de estado',
+                        'comentario' => 'Comentario',
+                        default => $state ?? '',
+                    })
                     ->sortable(),
 
                 TextColumn::make('user.name')
-                    ->label('Actor')
+                    ->label('Usuario')
                     ->sortable(),
 
                 TextColumn::make('comentario')
@@ -43,11 +50,11 @@ class HistoriesRelationManager extends RelationManager
                     ->limit(200),
 
                 TextColumn::make('old_value')
-                    ->label('Anterior')
+                    ->label('Valor anterior')
                     ->formatStateUsing(fn ($state): ?string => $this->resolveValue($state)),
 
                 TextColumn::make('new_value')
-                    ->label('Nuevo')
+                    ->label('Valor nuevo')
                     ->formatStateUsing(fn ($state): ?string => $this->resolveValue($state)),
             ])
             ->defaultSort('created_at', 'desc');

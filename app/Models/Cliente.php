@@ -20,4 +20,9 @@ class Cliente extends Model
     {
         return $this->hasMany(ClienteCbu::class);
     }
+
+    public function actividades()
+    {
+        return $this->hasMany(Actividad::class);
+    }
 }

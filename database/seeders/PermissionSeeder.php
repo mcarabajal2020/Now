@@ -8,39 +8,35 @@ use Illuminate\Database\Seeder;
 
 class PermissionSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
-        // Crear permisos
-        $permisos = [
-            ['recurso' => 'tasks', 'accion' => 'ver'],
-            ['recurso' => 'tasks', 'accion' => 'editar'],
-            ['recurso' => 'tasks', 'accion' => 'eliminar'],
-
-            ['recurso' => 'noticias', 'accion' => 'ver'],
-            ['recurso' => 'noticias', 'accion' => 'editar'],
-            ['recurso' => 'noticias', 'accion' => 'eliminar'],
-
-            ['recurso' => 'users', 'accion' => 'ver'],
-            ['recurso' => 'users', 'accion' => 'editar'],
-            ['recurso' => 'users', 'accion' => 'eliminar'],
-
-            ['recurso' => 'tipo_tareas', 'accion' => 'ver'],
-            ['recurso' => 'tipo_tareas', 'accion' => 'editar'],
-            ['recurso' => 'tipo_tareas', 'accion' => 'eliminar'],
-
-            ['recurso' => 'tipo_cierres', 'accion' => 'ver'],
-            ['recurso' => 'tipo_cierres', 'accion' => 'editar'],
-            ['recurso' => 'tipo_cierres', 'accion' => 'eliminar'],
+        $recursos = [
+            'tasks',
+            'noticias',
+            'users',
+            'oportunidades',
+            'clientes',
+            'paymentrequests',
+            'actividades',
+            'roles',
+            'permisos',
+            'user_permissions',
+            'areas',
+            'tipo_tareas',
+            'tipo_cierres',
         ];
 
-        foreach ($permisos as $permiso) {
-            Permission::firstOrCreate($permiso);
+        $acciones = ['ver', 'editar', 'eliminar'];
+
+        foreach ($recursos as $recurso) {
+            foreach ($acciones as $accion) {
+                Permission::firstOrCreate([
+                    'recurso' => $recurso,
+                    'accion' => $accion,
+                ]);
+            }
         }
 
-        // Crear roles
         $admin = Role::firstOrCreate(
             ['nombre' => 'admin'],
             ['descripcion' => 'Administrador con todos los permisos']
@@ -56,16 +52,8 @@ class PermissionSeeder extends Seeder
             ['descripcion' => 'Viewer solo puede ver recursos']
         );
 
-        // Asignar permisos al rol Admin (todos)
-        $adminPermisos = Permission::all();
-        $admin->permissions()->sync($adminPermisos);
-
-        // Asignar permisos al rol Editor (ver y editar)
-        $editorPermisos = Permission::where('accion', '!=', 'eliminar')->get();
-        $editor->permissions()->sync($editorPermisos);
-
-        // Asignar permisos al rol Viewer (solo ver)
-        $viewerPermisos = Permission::where('accion', 'ver')->get();
-        $viewer->permissions()->sync($viewerPermisos);
+        $admin->permissions()->sync(Permission::all());
+        $editor->permissions()->sync(Permission::where('accion', '!=', 'eliminar')->get());
+        $viewer->permissions()->sync(Permission::where('accion', 'ver')->get());
     }
 }

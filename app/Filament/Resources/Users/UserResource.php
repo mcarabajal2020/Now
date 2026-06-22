@@ -23,9 +23,18 @@ class UserResource extends Resource
 
     protected static ?string $navigationLabel = 'Usuarios';
 
+    protected static ?string $modelLabel = 'Usuario';
+
+    protected static ?string $pluralModelLabel = 'Usuarios';
+
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedUserGroup;
 
     protected static ?int $navigationSort = 5;
+
+    protected static function getPermissionKey(): string
+    {
+        return 'users';
+    }
 
     public static function form(Schema $schema): Schema
     {

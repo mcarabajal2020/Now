@@ -3,36 +3,51 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\ClienteResource\Pages;
+use App\Filament\Resources\ClienteResource\RelationManagers\ActividadesRelationManager;
 use App\Filament\Resources\ClienteResource\RelationManagers\CbusRelationManager;
+use App\Filament\Resources\Tasks\TaskResource;
+use App\Filament\Traits\AuthorizedResource;
 use App\Models\Cliente;
+use App\Models\PaymentRequest;
+use App\Models\Task;
 use BackedEnum;
 use Filament\Actions\Action;
-use App\Models\Task;
-use App\Models\PaymentRequest;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
-use Filament\Schemas\Schema;
+use Filament\Schemas\Components\Html as SchemaHtml;
 use Filament\Schemas\Components\Tabs as SchemaTabs;
 use Filament\Schemas\Components\Tabs\Tab as SchemaTab;
-use Filament\Schemas\Components\Html as SchemaHtml;
+use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Facades\Excel;
 
 class ClienteResource extends Resource
 {
+    use AuthorizedResource;
+
     protected static ?string $model = Cliente::class;
 
     protected static ?string $navigationLabel = 'Clientes';
+
+    protected static ?string $modelLabel = 'Cliente';
+
+    protected static ?string $pluralModelLabel = 'Clientes';
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::UserCircle;
 
     protected static ?int $navigationSort = 4;
 
+    protected static function getPermissionKey(): string
+    {
+        return 'clientes';
+    }
 
     public static function form(Schema $schema): Schema
     {
@@ -48,10 +63,10 @@ class ClienteResource extends Resource
                     ->required()
                     ->maxLength(255),
 
-               // TextInput::make('tags_text')
-                 //   ->label('Tags')
-                 //   ->helperText('Separá los tags por coma. Ej: EXTERNO1, EXTERNO2')
-                 //   ->maxLength(2000),
+                // TextInput::make('tags_text')
+                //   ->label('Tags')
+                //   ->helperText('Separá los tags por coma. Ej: EXTERNO1, EXTERNO2')
+                //   ->maxLength(2000),
 
                 // Tags son solo referencia externa; no se enganchan a ninguna otra entidad.
                 TextInput::make('tags')
@@ -76,7 +91,7 @@ class ClienteResource extends Resource
                                 fn ($t) => $t !== ''
                             )
                         );
-                    })
+                    }),
             ]);
     }
 
@@ -92,9 +107,9 @@ class ClienteResource extends Resource
                     ->toggleable(),
             ])
             ->filters([
-                \Filament\Tables\Filters\SelectFilter::make('tag')
+                SelectFilter::make('tag')
                     ->label('Filtrar por tag')
-                    ->options(fn () => \App\Models\Cliente::query()
+                    ->options(fn () => Cliente::query()
                         ->whereNotNull('tags')
                         ->get()
                         ->flatMap(fn ($c) => (array) $c->tags)
@@ -103,7 +118,7 @@ class ClienteResource extends Resource
                         ->values()
                         ->mapWithKeys(fn ($t) => [$t => $t])
                         ->toArray())
-                    ->query(function (\Illuminate\Database\Eloquent\Builder $query, $data) {
+                    ->query(function (Builder $query, $data) {
                         $value = $data['value'] ?? null;
 
                         if (blank($value)) {
@@ -114,48 +129,48 @@ class ClienteResource extends Resource
                     }),
             ])
             ->recordActions([
-                EditAction::make(),
-                    Action::make('historial')
-                        ->label('Historial')
-                        ->icon('heroicon-o-clock')
-                        ->modalHeading('Historial del cliente')
-                        ->modalWidth('lg')
-                        ->schema([
-                            SchemaTabs::make()
-                                ->tabs([
-                                    SchemaTab::make('tareas')
-                                        ->label('Tareas')
-                                        ->schema([
-                                            SchemaHtml::make(fn () => view('filament.pages.historial-tabs-tareas', [
-                                                'tasks' => Task::query()->where('cliente_id', request()->route('record') ?? null)->orderByDesc('ultima_modificacion')->orderByDesc('fecha_creacion')->get()->map(fn ($task) => [
-                                                    'id' => $task->id,
-                                                    'titulo' => $task->titulo,
-                                                    'detalle' => $task->detalle,
-                                                    'estado' => $task->estado,
-                                                    'fecha' => $task->ultima_modificacion ?? $task->fecha_creacion,
-                                                    'url' => \App\Filament\Resources\Tasks\TaskResource::getUrl('edit', ['record' => $task->id]),
-                                                ]),
-                                            ])->render()),
-                                        ]),
+                EditAction::make()->label('Editar'),
+                Action::make('historial')
+                    ->label('Historial')
+                    ->icon('heroicon-o-clock')
+                    ->modalHeading('Historial del cliente')
+                    ->modalWidth('lg')
+                    ->schema([
+                        SchemaTabs::make()
+                            ->tabs([
+                                SchemaTab::make('tareas')
+                                    ->label('Tareas')
+                                    ->schema([
+                                        SchemaHtml::make(fn () => view('filament.pages.historial-tabs-tareas', [
+                                            'tasks' => Task::query()->where('cliente_id', request()->route('record') ?? null)->orderByDesc('ultima_modificacion')->orderByDesc('fecha_creacion')->get()->map(fn ($task) => [
+                                                'id' => $task->id,
+                                                'titulo' => $task->titulo,
+                                                'detalle' => $task->detalle,
+                                                'estado' => $task->estado,
+                                                'fecha' => $task->ultima_modificacion ?? $task->fecha_creacion,
+                                                'url' => TaskResource::getUrl('edit', ['record' => $task->id]),
+                                            ]),
+                                        ])->render()),
+                                    ]),
 
-                                    SchemaTab::make('fondos')
-                                        ->label('Pedidos de fondos')
-                                        ->schema([
-                                            SchemaHtml::make(fn () => view('filament.pages.historial-tabs-fondos', [
-                                                'payments' => PaymentRequest::query()->where('cliente_id', request()->route('record') ?? null)->orderByDesc('fecha_pago')->orderByDesc('created_at')->get()->map(fn ($p) => [
-                                                    'id' => $p->id,
-                                                    'titulo' => 'Pedido de fondos',
-                                                    'detalle' => $p->observaciones,
-                                                    'estado' => $p->estado,
-                                                    'fecha' => $p->fecha_pago ?? $p->created_at,
-                                                    'importe_pagado' => $p->total_pagado ?? $p->monto ?? null,
-                                                    'url' => \App\Filament\Resources\PaymentRequestResource::getUrl('view', ['record' => $p->id]),
-                                                ]),
-                                            ])->render()),
-                                        ]),
-                                ])
-                                ->persistTabInQueryString('tab'),
-                        ]),
+                                SchemaTab::make('fondos')
+                                    ->label('Pedidos de fondos')
+                                    ->schema([
+                                        SchemaHtml::make(fn () => view('filament.pages.historial-tabs-fondos', [
+                                            'payments' => PaymentRequest::query()->where('cliente_id', request()->route('record') ?? null)->orderByDesc('fecha_pago')->orderByDesc('created_at')->get()->map(fn ($p) => [
+                                                'id' => $p->id,
+                                                'titulo' => 'Pedido de fondos',
+                                                'detalle' => $p->observaciones,
+                                                'estado' => $p->estado,
+                                                'fecha' => $p->fecha_pago ?? $p->created_at,
+                                                'importe_pagado' => $p->total_pagado ?? $p->monto ?? null,
+                                                'url' => PaymentRequestResource::getUrl('view', ['record' => $p->id]),
+                                            ]),
+                                        ])->render()),
+                                    ]),
+                            ])
+                            ->persistTabInQueryString('tab'),
+                    ]),
             ])
             ->toolbarActions([
                 Action::make('import')
@@ -343,6 +358,7 @@ class ClienteResource extends Resource
     {
         return [
             CbusRelationManager::class,
+            ActividadesRelationManager::class,
         ];
     }
 
@@ -354,12 +370,6 @@ class ClienteResource extends Resource
             'edit' => Pages\EditCliente::route('/{record}/edit'),
             // Historial del cliente (tareas + pedidos de fondos)
             'historial' => Pages\HistorialClientes::route('/{record}/historial'),
-
-
-
-
-
-
 
         ];
     }

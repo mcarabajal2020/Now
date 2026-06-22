@@ -7,14 +7,6 @@ use App\Models\User;
 
 class TipoCierrePolicy
 {
-    private function isAdminLike(User $user): bool
-    {
-        return $user->role?->nombre === 'admin'
-            || (bool) $user->puede_autorizar
-            || (bool) $user->puede_realizar_pago
-            || (bool) $user->puede_realizar_transferencia;
-    }
-
     public function viewAny(User $user): bool
     {
         return $this->isAdminLike($user) || $user->canViewResource('tipo_cierres');
@@ -38,5 +30,13 @@ class TipoCierrePolicy
     public function delete(User $user, TipoCierre $record): bool
     {
         return $this->isAdminLike($user) || $user->canEditResource('tipo_cierres');
+    }
+
+    private function isAdminLike(User $user): bool
+    {
+        return $user->role?->nombre === 'admin'
+            || (bool) $user->puede_autorizar
+            || (bool) $user->puede_realizar_pago
+            || (bool) $user->puede_realizar_transferencia;
     }
 }

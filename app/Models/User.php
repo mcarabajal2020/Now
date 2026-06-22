@@ -60,16 +60,21 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
     public function getPermission(string $recurso): ?string
     {
         // Verificar excepciones de usuario (tiene mayor prioridad)
-        $userPermission = $this->userPermissions()
+        $userPermissions = $this->userPermissions()
             ->where('recurso', $recurso)
-            ->first();
+            ->get();
 
-        if ($userPermission && $userPermission->accion === 'oculto') {
+        if ($userPermissions->contains('accion', 'oculto')) {
             return null;
         }
 
-        if ($userPermission && in_array($userPermission->accion, ['ver', 'editar'])) {
-            return $userPermission->accion;
+        // Priorizar: editar > ver
+        if ($userPermissions->contains('accion', 'editar')) {
+            return 'editar';
+        }
+
+        if ($userPermissions->contains('accion', 'ver')) {
+            return 'ver';
         }
 
         // Si no tiene rol, no tiene permisos
@@ -78,7 +83,6 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
         }
 
         // Verificar permisos del rol
-        // Ordenar por: editar > ver > otros (compatible con SQLite)
         $permission = $this->role->permissions()
             ->where('recurso', $recurso)
             ->orderByRaw("CASE WHEN accion = 'editar' THEN 1 WHEN accion = 'ver' THEN 2 ELSE 3 END")

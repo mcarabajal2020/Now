@@ -16,7 +16,7 @@ class ListPaymentRequests extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            CreateAction::make(),
+            CreateAction::make()->label('Crear pedido'),
             Action::make('export_xlsx')
                 ->label('Exportar a Excel')
                 ->icon('heroicon-o-document-arrow-down')
@@ -29,4 +29,3 @@ class ListPaymentRequests extends ListRecords
         ];
     }
 }
-

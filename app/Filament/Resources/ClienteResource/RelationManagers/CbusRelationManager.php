@@ -8,7 +8,6 @@ use Filament\Actions\EditAction;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
-
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
@@ -25,19 +24,19 @@ class CbusRelationManager extends RelationManager
         return $schema->components([
             TextInput::make('banco')->label('Banco')->maxLength(255),
             Select::make('tipo_cbu')
-                ->label('Tipo')
+                ->label('Tipo de CBU')
                 ->options([
-                    'c/c' => 'c/c',
-                    'c/a' => 'c/a',
-                    'cbu' => 'cbu',
-                    'cvu' => 'cvu',
+                    'c/c' => 'Cuenta corriente',
+                    'c/a' => 'Caja de ahorro',
+                    'cbu' => 'CBU',
+                    'cvu' => 'CVU',
                 ])
                 ->required()
                 ->searchable()
                 ->reactive()
                 ->dehydrated(true),
 
-            TextInput::make('cbu')->label('CBU')->maxLength(255),
+            TextInput::make('cbu')->label('CBU / CVU')->maxLength(255),
             Textarea::make('observaciones')->label('Observaciones')->columnSpanFull(),
         ]);
     }
@@ -51,11 +50,11 @@ class CbusRelationManager extends RelationManager
                 TextColumn::make('observaciones')->label('Observaciones')->limit(50)->wrap(),
             ])
             ->headerActions([
-                CreateAction::make(),
+                CreateAction::make()->label('Agregar CBU'),
             ])
             ->recordActions([
-                EditAction::make(),
-                DeleteAction::make(),
+                EditAction::make()->label('Editar'),
+                DeleteAction::make()->label('Eliminar'),
             ]);
     }
 }

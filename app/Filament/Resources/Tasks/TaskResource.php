@@ -15,8 +15,9 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class TaskResource extends Resource
 {
@@ -26,9 +27,18 @@ class TaskResource extends Resource
 
     protected static ?string $navigationLabel = 'Tickets';
 
+    protected static ?string $modelLabel = 'Ticket';
+
+    protected static ?string $pluralModelLabel = 'Tickets';
+
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 
     protected static ?int $navigationSort = 2;
+
+    protected static function getPermissionKey(): string
+    {
+        return 'tasks';
+    }
 
     public static function form(Schema $schema): Schema
     {
@@ -68,6 +78,7 @@ class TaskResource extends Resource
                                 }
                             }
                         }
+
                         return null;
                     };
 
@@ -84,37 +95,23 @@ class TaskResource extends Resource
                     // Añadir condiciones para buscar por cliente (nombre, número de cuenta, tags)
                     $query->where(function (Builder $q) use ($search) {
                         $q->where('titulo', 'like', "%{$search}%")
-                          ->orWhere('detalle', 'like', "%{$search}%")
-                          ->orWhereHas('cliente', function (Builder $cq) use ($search) {
-                              $cq->where('nombre_cuenta', 'like', "%{$search}%")
-                                 ->orWhere('numero_cuenta', 'like', "%{$search}%");
+                            ->orWhere('detalle', 'like', "%{$search}%")
+                            ->orWhereHas('cliente', function (Builder $cq) use ($search) {
+                                $cq->where('nombre_cuenta', 'like', "%{$search}%")
+                                    ->orWhere('numero_cuenta', 'like', "%{$search}%");
 
-                              // Buscar en JSON 'tags' usando JSON_CONTAINS en MySQL o LIKE como fallback
-                              $driver = \Illuminate\Support\Facades\DB::getDriverName();
-                              if ($driver === 'mysql') {
-                                  $cq->orWhereRaw('JSON_CONTAINS(tags, ?)', [json_encode((string) $search)]);
-                              } else {
-                                  $cq->orWhere('tags', 'like', "%{$search}%");
-                              }
-                          });
+                                // Buscar en JSON 'tags' usando JSON_CONTAINS en MySQL o LIKE como fallback
+                                $driver = DB::getDriverName();
+                                if ($driver === 'mysql') {
+                                    $cq->orWhereRaw('JSON_CONTAINS(tags, ?)', [json_encode((string) $search)]);
+                                } else {
+                                    $cq->orWhere('tags', 'like', "%{$search}%");
+                                }
+                            });
                     });
                 }
 
-                // Admin ve todas las tareas
-                if ($user->role?->nombre === 'admin') {
-                    return $query;
-                }
-
-                // Multiusuario: ver solicitadas por ti o asignadas a ti
-                return $query->where(function (Builder $q) use ($user) {
-                    $q->where('usuario_solicita_id', $user->id)
-                        ->orWhere('asignado_a_id', $user->id);
-
-                    // Si el usuario pertenece a un área, también ver tareas asignadas a esa área
-                    if ($user->area_id) {
-                        $q->orWhere('area_id', $user->area_id);
-                    }
-                });
+                return $query;
             });
     }
 

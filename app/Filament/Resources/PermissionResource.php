@@ -3,6 +3,7 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\PermissionResource\Pages;
+use App\Filament\Traits\AuthorizedResource;
 use App\Models\Permission;
 use BackedEnum;
 use Filament\Actions\BulkActionGroup;
@@ -17,22 +18,28 @@ use Filament\Tables\Table;
 
 class PermissionResource extends Resource
 {
+    use AuthorizedResource;
+
     protected static ?string $model = Permission::class;
 
     protected static ?string $navigationLabel = 'Permisos';
-    
+
+    protected static ?string $modelLabel = 'Permiso';
+
+    protected static ?string $pluralModelLabel = 'Permisos';
+
     protected static string|BackedEnum|null $navigationIcon = Heroicon::LockClosed;
 
     protected static ?int $navigationSort = 7;
 
-    public static function canViewAny(): bool
+    public static function shouldRegisterNavigation(): bool
     {
-        return auth()->user()?->role?->nombre === 'admin';
+        return false;
     }
 
-    public static function canCreate(): bool
+    protected static function getPermissionKey(): string
     {
-        return auth()->user()?->role?->nombre === 'admin';
+        return 'permisos';
     }
 
     public static function form(Schema $schema): Schema
@@ -42,11 +49,16 @@ class PermissionResource extends Resource
                 Select::make('recurso')
                     ->label('Recurso')
                     ->options([
-                        'tasks' => 'Tasks',
+                        'tasks' => 'Tareas',
                         'noticias' => 'Noticias',
-                        'users' => 'Users',
-                        'tipo_cierres' => 'Tipo Cierres',
-                        'tipo_tareas' => 'Tipo Tareas',
+                        'users' => 'Usuarios',
+                        'oportunidades' => 'Oportunidades',
+                        'clientes' => 'Clientes',
+                        'paymentrequests' => 'Pedidos de fondos',
+                        'actividades' => 'Actividades',
+                        'areas' => 'Areas',
+                        'tipo_cierres' => 'Tipos de cierre',
+                        'tipo_tareas' => 'Tipos de tarea',
                     ])
                     ->required(),
 
@@ -68,7 +80,20 @@ class PermissionResource extends Resource
                 TextColumn::make('recurso')
                     ->label('Recurso')
                     ->badge()
-                    ->searchable(),
+                    ->searchable()
+                    ->formatStateUsing(fn (string $state): string => match ($state) {
+                        'tasks' => 'Tareas',
+                        'noticias' => 'Noticias',
+                        'users' => 'Usuarios',
+                        'oportunidades' => 'Oportunidades',
+                        'clientes' => 'Clientes',
+                        'paymentrequests' => 'Pedidos de fondos',
+                        'actividades' => 'Actividades',
+                        'areas' => 'Areas',
+                        'tipo_cierres' => 'Tipos de cierre',
+                        'tipo_tareas' => 'Tipos de tarea',
+                        default => $state,
+                    }),
 
                 TextColumn::make('accion')
                     ->label('Acción')
@@ -84,11 +109,11 @@ class PermissionResource extends Resource
                 //
             ])
             ->recordActions([
-                EditAction::make(),
+                EditAction::make()->label('Editar'),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make(),
+                    DeleteBulkAction::make()->label('Eliminar'),
                 ]),
             ]);
     }

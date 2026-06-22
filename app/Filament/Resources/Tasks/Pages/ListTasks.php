@@ -16,7 +16,7 @@ class ListTasks extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            CreateAction::make(),
+            CreateAction::make()->label('Crear ticket'),
             Action::make('export_xlsx')
                 ->label('Exportar a Excel')
                 ->icon('heroicon-o-document-arrow-down')
@@ -29,4 +29,3 @@ class ListTasks extends ListRecords
         ];
     }
 }
-

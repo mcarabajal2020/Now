@@ -2,17 +2,18 @@
 
 namespace App\Filament\Resources\Tasks\Tables;
 
+use App\Models\TipoTarea;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Filters\SelectFilter;
-use Filament\Tables\Filters\Filter;
-use Illuminate\Database\Eloquent\Builder;
-use Filament\Tables\Table;
 use Filament\Forms\Components\TextInput;
 use Filament\Support\Icons\Heroicon;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\Filter;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class TasksTable
 {
@@ -59,12 +60,16 @@ class TasksTable
 
                 TextColumn::make('tipo_uso')
                     ->label('Uso')
+                    ->formatStateUsing(fn (?string $state): string => match ($state) {
+                        'uso interno' => 'Uso interno',
+                        'uso externo' => 'Uso externo',
+                        default => $state ?? '',
+                    })
                     ->toggleable(),
 
                 TextColumn::make('tipoTarea.nombre')
                     ->label('Tipo de tarea')
                     ->toggleable(isToggledHiddenByDefault: true),
-
 
                 TextColumn::make('prioridad')
                     ->label('Prioridad')
@@ -74,11 +79,16 @@ class TasksTable
                         'prioridad baja' => 'gray',
                         default => 'secondary',
                     })
+                    ->formatStateUsing(fn (?string $state): string => match ($state) {
+                        'prioridad alta' => 'Prioridad alta',
+                        'prioridad baja' => 'Prioridad baja',
+                        default => $state ?? '',
+                    })
                     ->toggleable(),
 
                 TextColumn::make('cliente.numero_cuenta')
                     ->label('Cliente (cuenta)')
-                    ->getStateUsing(fn ($record) => $record->cliente ? ($record->cliente->numero_cuenta . ' — ' . $record->cliente->nombre_cuenta) : null)
+                    ->getStateUsing(fn ($record) => $record->cliente ? ($record->cliente->numero_cuenta.' — '.$record->cliente->nombre_cuenta) : null)
                     ->toggleable(isToggledHiddenByDefault: true),
 
                 TextColumn::make('ultima_modificacion')
@@ -100,10 +110,11 @@ class TasksTable
                             return $query;
                         }
                         $search = trim($data['cliente_search']);
+
                         return $query->whereHas('cliente', function (Builder $q) use ($search) {
                             $q->where('nombre_cuenta', 'like', "%{$search}%")
-                              ->orWhere('numero_cuenta', 'like', "%{$search}%")
-                              ->orWhereRaw('JSON_CONTAINS(tags, ?)', [json_encode((string) $search)]);
+                                ->orWhere('numero_cuenta', 'like', "%{$search}%")
+                                ->orWhereRaw('JSON_CONTAINS(tags, ?)', [json_encode((string) $search)]);
                         });
                     }),
 
@@ -117,7 +128,7 @@ class TasksTable
                 SelectFilter::make('tipo_tarea_id')
                     ->label('Tipo de tarea')
                     ->options(
-                        \App\Models\TipoTarea::query()->pluck('nombre', 'id')->toArray()
+                        TipoTarea::query()->pluck('nombre', 'id')->toArray()
                     )
                     ->query(function (Builder $query, array $data): Builder {
                         if (empty($data['tipo_tarea_id'])) {
@@ -126,8 +137,6 @@ class TasksTable
 
                         return $query->where('tipo_tarea_id', $data['tipo_tarea_id']);
                     }),
-
-
 
                 SelectFilter::make('prioridad')
                     ->label('Prioridad')
@@ -140,10 +149,9 @@ class TasksTable
             ->emptyStateActions([
                 //
             ])
-
             ->recordActions([
-                EditAction::make(),
-                
+                EditAction::make()->label('Editar'),
+
                 Action::make('assignToMe')
                     ->label('Asignarme')
                     ->icon(Heroicon::OutlinedCheckCircle)
@@ -155,7 +163,7 @@ class TasksTable
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make(),
+                    DeleteBulkAction::make()->label('Eliminar'),
                 ]),
             ]);
 

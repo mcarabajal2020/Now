@@ -3,6 +3,7 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\RoleResource\Pages;
+use App\Filament\Traits\AuthorizedResource;
 use App\Models\Role;
 use BackedEnum;
 use Filament\Actions\BulkActionGroup;
@@ -13,28 +14,39 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
+use UnitEnum;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
 class RoleResource extends Resource
 {
+    use AuthorizedResource;
+
     protected static ?string $model = Role::class;
 
     protected static ?string $navigationLabel = 'Roles';
+
+    protected static ?string $modelLabel = 'Rol';
+
+    protected static ?string $pluralModelLabel = 'Roles';
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::LockClosed;
 
     protected static ?int $navigationSort = 6;
 
-    public static function canViewAny(): bool
+    protected static string|UnitEnum|null $navigationGroup = 'Configuracion';
+
+    protected static ?string $navigationParentItem = null;
+
+    public static function shouldRegisterNavigation(): bool
     {
-        return auth()->user()?->role?->nombre === 'admin';
+        return false;
     }
 
-    public static function canCreate(): bool
+    protected static function getPermissionKey(): string
     {
-        return auth()->user()?->role?->nombre === 'admin';
+        return 'roles';
     }
 
     public static function form(Schema $schema): Schema
@@ -78,11 +90,11 @@ class RoleResource extends Resource
                 //
             ])
             ->recordActions([
-                EditAction::make(),
+                EditAction::make()->label('Editar'),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make(),
+                    DeleteBulkAction::make()->label('Eliminar'),
                 ]),
             ]);
     }

@@ -2,18 +2,20 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\Pages\Dashboard;
 use App\Filament\Widgets\FinishedTasksLast7DaysWidget;
+use App\Filament\Widgets\KpiStatsWidget;
 use App\Filament\Widgets\OpenTasksWidget;
+use App\Filament\Widgets\OpportunityPipelineWidget;
+use App\Filament\Widgets\PaymentCashTotalWidget;
+use App\Filament\Widgets\RecentTasksWidget;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
-use Filament\Pages\Dashboard;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
-use Filament\Widgets\AccountWidget;
-use Filament\Widgets\FilamentInfoWidget;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
@@ -42,8 +44,10 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')
             ->widgets([
-                // AccountWidget::class,
-                // FilamentInfoWidget::class,
+                KpiStatsWidget::class,
+                OpportunityPipelineWidget::class,
+                PaymentCashTotalWidget::class,
+                RecentTasksWidget::class,
                 OpenTasksWidget::class,
                 FinishedTasksLast7DaysWidget::class,
             ])

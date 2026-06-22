@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Tasks\Schemas;
 
+use App\Models\Cliente;
 use App\Models\Task;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Hidden;
@@ -48,18 +49,16 @@ class TaskForm
                         ! (
                             Auth::id() === $record?->asignado_a_id ||
                             (
-                                ! is_null(Auth::user()?->area_id) &&
-                                ! is_null($record?->area_id) &&
-                                Auth::user()?->area_id === $record?->area_id
+                                $record?->area_id &&
+                                Auth::user()?->areas?->contains('id', $record?->area_id)
                             )
                         )
                     )
                     ->dehydrated(fn (?Task $record): bool => filled($record) && (
-                            Auth::id() === $record->asignado_a_id ||
+                        Auth::id() === $record->asignado_a_id ||
                         (
-                            ! is_null(auth()->user()?->area_id) &&
-                            ! is_null($record->area_id) &&
-                            auth()->user()?->area_id === $record->area_id
+                            $record->area_id &&
+                            Auth::user()?->areas?->contains('id', $record->area_id)
                         )
                     ) && $record->estado !== 'Finalizado')
                     ->columnSpanFull(),
@@ -103,7 +102,12 @@ class TaskForm
                     ])
                     ->default('uso interno')
                     ->required()
-                    ->reactive(),
+                    ->reactive()
+                    ->formatStateUsing(fn (?string $state): string => match ($state) {
+                        'uso interno' => 'Uso interno',
+                        'uso externo' => 'Uso externo',
+                        default => $state ?? '',
+                    }),
 
                 Select::make('tipo_tarea_id')
                     ->label('Tipo de tarea')
@@ -112,7 +116,6 @@ class TaskForm
                     ->preload()
                     ->nullable(),
 
-
                 Select::make('prioridad')
                     ->label('Prioridad')
                     ->options([
@@ -120,7 +123,12 @@ class TaskForm
                         'prioridad baja' => 'Prioridad baja',
                     ])
                     ->default('prioridad alta')
-                    ->required(),
+                    ->required()
+                    ->formatStateUsing(fn (?string $state): string => match ($state) {
+                        'prioridad alta' => 'Prioridad alta',
+                        'prioridad baja' => 'Prioridad baja',
+                        default => $state ?? '',
+                    }),
 
                 // -----------------
                 // Cliente (solo uso externo)
@@ -134,10 +142,11 @@ class TaskForm
                     ->options(function () {
                         // para que el select funcione como “buscar por nombre/cuenta/tag” usamos una lista paginada
                         // (Filament internamente hace search; con preload puede ser pesado con muchos clientes)
-                        return \App\Models\Cliente::query()
+                        return Cliente::query()
                             ->get()
                             ->mapWithKeys(function ($c) {
-                                $tagStr = is_array($c->tags) && ! empty($c->tags) ? (' [' . implode(', ', $c->tags) . ']') : '';
+                                $tagStr = is_array($c->tags) && ! empty($c->tags) ? (' ['.implode(', ', $c->tags).']') : '';
+
                                 return [$c->id => $c->numero_cuenta.' - '.$c->nombre_cuenta.$tagStr];
                             })
                             ->toArray();

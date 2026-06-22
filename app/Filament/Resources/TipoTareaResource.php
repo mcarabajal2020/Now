@@ -3,8 +3,10 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\TipoTareaResource\Pages;
+use App\Filament\Traits\AuthorizedResource;
 use App\Models\TipoTarea;
 use BackedEnum;
+use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
@@ -13,55 +15,29 @@ use Filament\Tables\Table;
 
 class TipoTareaResource extends Resource
 {
+    use AuthorizedResource;
+
     protected static ?string $model = TipoTarea::class;
 
-    public static function canViewAny(): bool
-    {
-        /** @var \App\Models\User|null $user */
-        $user = auth()->user();
+    protected static ?string $navigationLabel = 'Tipos de tareas';
 
-        if (! $user) {
-            return false;
-        }
+    protected static ?string $modelLabel = 'Tipo de tarea';
 
-        if ($user->role?->nombre === 'admin') {
-            return true;
-        }
-
-        return $user->role?->permissions()
-            ->where('recurso', 'tipo_tareas')
-            ->where('accion', 'ver')
-            ->exists() ?? false;
-    }
-
-    public static function canCreate(): bool
-    {
-        /** @var \App\Models\User|null $user */
-        $user = auth()->user();
-
-        if (! $user) {
-            return false;
-        }
-
-        if ($user->role?->nombre === 'admin') {
-            return true;
-        }
-
-        return $user->role?->permissions()
-            ->where('recurso', 'tipo_tareas')
-            ->where('accion', 'editar')
-            ->exists() ?? false;
-    }
+    protected static ?string $pluralModelLabel = 'Tipos de tareas';
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::ClipboardDocumentList;
 
     protected static ?int $navigationSort = 10;
 
+    protected static function getPermissionKey(): string
+    {
+        return 'tipo_tareas';
+    }
 
     public static function form(Schema $schema): Schema
     {
         return $schema->components([
-            \Filament\Forms\Components\TextInput::make('nombre')
+            TextInput::make('nombre')
                 ->required()
                 ->maxLength(255),
         ]);
@@ -92,4 +68,3 @@ class TipoTareaResource extends Resource
         ];
     }
 }
-

@@ -2,18 +2,16 @@
 
 namespace App\Exports;
 
-use App\Models\Task;
 use Illuminate\Database\Eloquent\Builder;
 use Maatwebsite\Excel\Concerns\FromQuery;
-use Maatwebsite\Excel\Concerns\WithHeadings;
-use Maatwebsite\Excel\Concerns\WithMapping;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithColumnFormatting;
+use Maatwebsite\Excel\Concerns\WithHeadings;
+use Maatwebsite\Excel\Concerns\WithMapping;
 use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 
-class TasksExport implements FromQuery, WithHeadings, WithMapping, ShouldAutoSize, WithColumnFormatting
+class TasksExport implements FromQuery, ShouldAutoSize, WithColumnFormatting, WithHeadings, WithMapping
 {
-    /** @var Builder */
     protected Builder $query;
 
     public function __construct(Builder $query)
@@ -55,7 +53,7 @@ class TasksExport implements FromQuery, WithHeadings, WithMapping, ShouldAutoSiz
             $task->area?->nombre,
             optional($task->fecha_finalizacion)?->format('Y-m-d H:i:s'),
             $task->tipo_uso,
-            $task->tipo_tarea,
+            $task->tipoTarea?->nombre,
             $task->prioridad,
             $task->cliente?->numero_cuenta,
             optional($task->ultima_modificacion)?->format('Y-m-d H:i:s'),
@@ -72,4 +70,3 @@ class TasksExport implements FromQuery, WithHeadings, WithMapping, ShouldAutoSiz
         ];
     }
 }
-

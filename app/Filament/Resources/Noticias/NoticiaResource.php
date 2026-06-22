@@ -32,8 +32,13 @@ class NoticiaResource extends Resource
     protected static ?string $recordTitleAttribute = 'titulo';
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedNewspaper;
-    
+
     protected static ?int $navigationSort = 1;
+
+    protected static function getPermissionKey(): string
+    {
+        return 'noticias';
+    }
 
     public static function form(Schema $schema): Schema
     {

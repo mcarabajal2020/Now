@@ -3,6 +3,7 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\AreaResource\Pages;
+use App\Filament\Traits\AuthorizedResource;
 use App\Models\Area;
 use BackedEnum;
 use Filament\Actions\BulkActionGroup;
@@ -18,24 +19,24 @@ use Filament\Tables\Table;
 
 class AreaResource extends Resource
 {
+    use AuthorizedResource;
+
     protected static ?string $model = Area::class;
 
     protected static ?string $navigationLabel = 'Áreas';
 
+    protected static ?string $modelLabel = 'Área';
+
+    protected static ?string $pluralModelLabel = 'Áreas';
+
     protected static string|BackedEnum|null $navigationIcon = Heroicon::BuildingOffice2;
-    
+
     protected static ?int $navigationSort = 9;
 
-    public static function canViewAny(): bool
+    protected static function getPermissionKey(): string
     {
-        return auth()->user()?->role?->nombre === 'admin';
+        return 'areas';
     }
-
-    public static function canCreate(): bool
-    {
-        return auth()->user()?->role?->nombre === 'admin';
-    }
-
 
     public static function form(Schema $schema): Schema
     {
@@ -60,11 +61,11 @@ class AreaResource extends Resource
                 TextColumn::make('descripcion')->label('Descripción')->limit(50),
             ])
             ->recordActions([
-                EditAction::make(),
+                EditAction::make()->label('Editar'),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make(),
+                    DeleteBulkAction::make()->label('Eliminar'),
                 ]),
             ]);
     }

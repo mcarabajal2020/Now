@@ -22,8 +22,14 @@ class UsersTable
                     ->size(40)
                     ->defaultImageUrl(fn ($record): string => 'https://ui-avatars.com/api/?name='.urlencode($record->name).'&background=f59e0b&color=111827'),
 
-                TextColumn::make('name')->searchable()->sortable(),
-                TextColumn::make('email')->searchable()->sortable(),
+                TextColumn::make('name')
+                    ->label('Nombre')
+                    ->searchable()
+                    ->sortable(),
+                TextColumn::make('email')
+                    ->label('Email')
+                    ->searchable()
+                    ->sortable(),
                 TextColumn::make('fecha_nacimiento')->date()->label('Nacimiento')->sortable(),
                 TextColumn::make('area.nombre')
                     ->label('Área')
@@ -34,11 +40,11 @@ class UsersTable
                 //
             ])
             ->recordActions([
-                EditAction::make(),
+                EditAction::make()->label('Editar'),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make(),
+                    DeleteBulkAction::make()->label('Eliminar'),
                 ]),
             ]);
     }

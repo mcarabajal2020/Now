@@ -14,6 +14,7 @@ class ViewPaymentRequest extends ViewRecord
     {
         return [
             EditAction::make()
+                ->label('Editar')
                 ->visible(fn (): bool => $this->record->estado !== 'terminado'),
         ];
     }

@@ -16,10 +16,23 @@ class LogsRelationManager extends RelationManager
     {
         return $table
             ->columns([
-                TextColumn::make('event')->label('Evento'),
-                TextColumn::make('user.name')->label('Usuario'),
-                TextColumn::make('message')->label('Mensaje')->wrap(),
-                TextColumn::make('created_at')->label('Fecha')->dateTime(),
+                TextColumn::make('event')
+                    ->label('Evento')
+                    ->formatStateUsing(fn (?string $state): string => match ($state) {
+                        'autorizado' => 'Autorizado',
+                        'pagado' => 'Pagado',
+                        'transferido' => 'Transferido',
+                        'cancelado' => 'Cancelado',
+                        default => $state ?? '',
+                    }),
+                TextColumn::make('user.name')
+                    ->label('Usuario'),
+                TextColumn::make('message')
+                    ->label('Mensaje')
+                    ->wrap(),
+                TextColumn::make('created_at')
+                    ->label('Fecha')
+                    ->dateTime(),
             ])
             ->filters([])
             ->headerActions([])

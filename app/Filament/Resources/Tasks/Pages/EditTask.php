@@ -5,9 +5,9 @@ namespace App\Filament\Resources\Tasks\Pages;
 use App\Filament\Resources\Tasks\TaskResource;
 use App\Models\User;
 use Filament\Actions\Action;
+use Filament\Actions\DeleteAction;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
-use Filament\Actions\DeleteAction;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
 
@@ -118,7 +118,6 @@ class EditTask extends EditRecord
             ]);
         }
 
-
         Notification::make()
             ->success()
             ->title('Tarea finalizada')
@@ -155,7 +154,7 @@ class EditTask extends EditRecord
                     $this->record->refresh();
                 }),
 
-            DeleteAction::make(),
+            DeleteAction::make()->label('Eliminar'),
         ];
     }
 
@@ -175,14 +174,12 @@ class EditTask extends EditRecord
             return false;
         }
 
-        if (! $this->record->area_id || ! $user->area_id) {
+        if (! $this->record->area_id || ! $user->areas->contains('id', $this->record->area_id)) {
             return false;
         }
 
-        return $user->area_id === $this->record->area_id;
+        return true;
     }
-
-
 
     protected function getFormActions(): array
     {
@@ -209,7 +206,6 @@ class EditTask extends EditRecord
                     ->preload()
                     ->required(),
 
-
                 Textarea::make('comentario')
                     ->label('Comentario (opcional)')
                     ->rows(3)
@@ -234,8 +230,8 @@ class EditTask extends EditRecord
         }
 
         // Permitir a cualquier usuario de la misma área
-        if (! is_null($currentUser->area_id) && ! is_null($this->record->area_id)) {
-            return $currentUser->area_id === $this->record->area_id;
+        if (! is_null($this->record->area_id) && $currentUser->areas->contains('id', $this->record->area_id)) {
+            return true;
         }
 
         return false;

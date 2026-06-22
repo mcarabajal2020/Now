@@ -2,8 +2,13 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Resources\TipoCierreResource\Pages\CreateTipoCierre;
+use App\Filament\Resources\TipoCierreResource\Pages\EditTipoCierre;
+use App\Filament\Resources\TipoCierreResource\Pages\ListTipoCierres;
+use App\Filament\Traits\AuthorizedResource;
 use App\Models\TipoCierre;
 use BackedEnum;
+use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
@@ -12,56 +17,29 @@ use Filament\Tables\Table;
 
 class TipoCierreResource extends Resource
 {
+    use AuthorizedResource;
+
     protected static ?string $model = TipoCierre::class;
 
-    public static function canViewAny(): bool
-    {
-        /** @var \App\Models\User|null $user */
-        $user = auth()->user();
-
-        if (! $user) {
-            return false;
-        }
-
-        if ($user->role?->nombre === 'admin') {
-            return true;
-        }
-
-        return $user->role?->permissions()
-            ->where('recurso', 'tipo_cierres')
-            ->where('accion', 'ver')
-            ->exists() ?? false;
-    }
-
-    public static function canCreate(): bool
-    {
-        /** @var \App\Models\User|null $user */
-        $user = auth()->user();
-
-        if (! $user) {
-            return false;
-        }
-
-        if ($user->role?->nombre === 'admin') {
-            return true;
-        }
-
-        return $user->role?->permissions()
-            ->where('recurso', 'tipo_cierres')
-            ->where('accion', 'editar')
-            ->exists() ?? false;
-    }
-
     protected static ?string $navigationLabel = 'Tipos de cierre';
+
+    protected static ?string $modelLabel = 'Tipo de cierre';
+
+    protected static ?string $pluralModelLabel = 'Tipos de cierre';
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::ExclamationTriangle;
 
     protected static ?int $navigationSort = 11;
 
+    protected static function getPermissionKey(): string
+    {
+        return 'tipo_cierres';
+    }
+
     public static function form(Schema $schema): Schema
     {
         return $schema->components([
-            \Filament\Forms\Components\TextInput::make('nombre')
+            TextInput::make('nombre')
                 ->required()
                 ->maxLength(255),
         ]);
@@ -86,9 +64,9 @@ class TipoCierreResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => \App\Filament\Resources\TipoCierreResource\Pages\ListTipoCierres::route('/'),
-            'create' => \App\Filament\Resources\TipoCierreResource\Pages\CreateTipoCierre::route('/create'),
-            'edit' => \App\Filament\Resources\TipoCierreResource\Pages\EditTipoCierre::route('/{record}/edit'),
+            'index' => ListTipoCierres::route('/'),
+            'create' => CreateTipoCierre::route('/create'),
+            'edit' => EditTipoCierre::route('/{record}/edit'),
         ];
     }
 }
