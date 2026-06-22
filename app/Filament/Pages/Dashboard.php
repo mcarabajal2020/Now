@@ -15,15 +15,17 @@ class Dashboard extends BaseDashboard
 {
     protected static ?string $navigationLabel = 'Dashboard';
 
-    protected static ?string $title = 'Dashboard';
+    protected static ?string $title = 'Panel de control';
+
+    protected static ?int $navigationSort = 0;
 
     public function getWidgets(): array
     {
         return [
             KpiStatsWidget::class,
+            PaymentCashTotalWidget::class,
             AgendaWidget::class,
             OpportunityPipelineWidget::class,
-            PaymentCashTotalWidget::class,
             RecentTasksWidget::class,
             OpenTasksWidget::class,
             FinishedTasksLast7DaysWidget::class,

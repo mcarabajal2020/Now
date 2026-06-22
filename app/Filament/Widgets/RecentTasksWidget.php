@@ -16,17 +16,7 @@ class RecentTasksWidget extends TableWidget
 
     public function table(Table $table): Table
     {
-        $user = auth()->user();
-        $isAdmin = $user->role?->nombre === 'admin';
-
         $query = Task::query()->with(['solicitante', 'asignadoA']);
-
-        if (! $isAdmin) {
-            $query->where(function ($q) use ($user) {
-                $q->where('usuario_solicita_id', $user->id)
-                    ->orWhere('asignado_a_id', $user->id);
-            });
-        }
 
         return $table
             ->query($query)

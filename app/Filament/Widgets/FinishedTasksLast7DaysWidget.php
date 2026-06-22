@@ -12,27 +12,19 @@ class FinishedTasksLast7DaysWidget extends TableWidget
 {
     protected static ?int $sort = 2;
 
-    protected static ?string $heading = 'Tareas Finalizadas Últimos 7 Días';
+    protected static ?string $heading = 'Tareas Finalizadas Ultimos 7 Dias';
 
     public function table(Table $table): Table
     {
-        $user = auth()->user();
-        $since = now()->subDays(7);
-
         return $table
-            ->query(function () use ($user, $since) {
-                return Task::query()
+            ->query(
+                Task::query()
                     ->where('estado', 'Finalizado')
-                    ->where('fecha_finalizacion', '>=', $since)
-                    ->where(function ($q) use ($user) {
-                        $q->where('usuario_solicita_id', $user->id)
-                            ->orWhere('asignado_a_id', $user->id);
-                    });
-            })
-
+                    ->where('fecha_finalizacion', '>=', now()->subWeek())
+            )
             ->columns([
                 TextColumn::make('titulo')->label('Tarea'),
-                TextColumn::make('fecha_finalizacion')->dateTime()->label('Finalización'),
+                TextColumn::make('fecha_finalizacion')->dateTime()->label('Finalizacion'),
             ])
             ->defaultPaginationPageOption(5)
             ->filters([])

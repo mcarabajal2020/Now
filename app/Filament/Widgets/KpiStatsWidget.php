@@ -15,83 +15,67 @@ class KpiStatsWidget extends StatsOverviewWidget
 
     protected function getStats(): array
     {
-        $user = auth()->user();
-        $isAdmin = $user->role?->nombre === 'admin';
-
-        $tareasQuery = Task::query();
-        $oportunidadesQuery = Opportunity::query();
-        $pagosQuery = PaymentRequest::query();
-
-        if (! $isAdmin) {
-            $tareasQuery->where(function ($q) use ($user) {
-                $q->where('usuario_solicita_id', $user->id)
-                    ->orWhere('asignado_a_id', $user->id);
-            });
-            $oportunidadesQuery->where('user_id', $user->id);
-            $pagosQuery->where('solicitante_id', $user->id);
-        }
-
-        $tareasAbiertas = (clone $tareasQuery)
+        $tareasAbiertas = Task::query()
             ->whereIn('estado', ['Nuevo', 'En Proceso'])
             ->count();
 
-        $tareasFinalizadasHoy = (clone $tareasQuery)
+        $tareasFinalizadasHoy = Task::query()
             ->where('estado', 'Finalizado')
             ->whereDate('fecha_finalizacion', now()->toDateString())
             ->count();
 
-        $tareasFinalizadasSemana = (clone $tareasQuery)
+        $tareasFinalizadasSemana = Task::query()
             ->where('estado', 'Finalizado')
             ->where('fecha_finalizacion', '>=', now()->subWeek())
             ->count();
 
-        $oportunidadesAbiertas = (clone $oportunidadesQuery)
+        $oportunidadesAbiertas = Opportunity::query()
             ->abiertas()
             ->count();
 
-        $montoPipeline = (clone $oportunidadesQuery)
+        $montoPipeline = Opportunity::query()
             ->abiertas()
             ->sum('monto_estimado');
 
-        $oportunidadesGanadas = (clone $oportunidadesQuery)
+        $oportunidadesGanadas = Opportunity::query()
             ->ganadas()
             ->count();
 
-        $montoGanado = (clone $oportunidadesQuery)
+        $montoGanado = Opportunity::query()
             ->ganadas()
             ->sum('monto_estimado');
 
-        $pagosPendientes = (clone $pagosQuery)
+        $pagosPendientes = PaymentRequest::query()
             ->whereIn('estado', ['pendiente_autorizacion', 'pendiente_pago', 'pendiente_transferencia'])
             ->count();
 
-        $montoPendiente = (clone $pagosQuery)
+        $montoPendiente = PaymentRequest::query()
             ->whereIn('estado', ['pendiente_autorizacion', 'pendiente_pago', 'pendiente_transferencia'])
             ->sum('monto');
 
         $totalClientes = Cliente::count();
 
         return [
-            Stat::make('Tareas abiertas', $tareasAbiertas)
-                ->description($tareasFinalizadasHoy.' finalizadas hoy')
+            Stat::make('Tickets abiertos', $tareasAbiertas)
+                ->description($tareasFinalizadasHoy.' finalizados hoy')
                 ->descriptionIcon('heroicon-m-check-circle')
                 ->color($tareasAbiertas > 0 ? 'warning' : 'success')
                 ->url(route('filament.admin.resources.tasks.index')),
 
-            Stat::make('Finalizadas (7d)', $tareasFinalizadasSemana)
+            Stat::make('Finalizados (7d)', $tareasFinalizadasSemana)
                 ->description('Ultimos 7 dias')
                 ->descriptionIcon('heroicon-m-calendar')
                 ->color('success'),
 
-            Stat::make('Oportunidades abiertas', $oportunidadesAbiertas)
-                ->description('$'.number_format($montoPipeline, 0, ',', '.'))
-                ->descriptionIcon('heroicon-m-currency-dollar')
+            Stat::make('Pipeline', '$'.number_format($montoPipeline, 0, ',', '.'))
+                ->description($oportunidadesAbiertas.' oportunidades abiertas')
+                ->descriptionIcon('heroicon-m-arrow-trending-up')
                 ->color('info')
                 ->url(route('filament.admin.resources.opportunities.index')),
 
-            Stat::make('Oportunidades ganadas', $oportunidadesGanadas)
+            Stat::make('Ganadas', $oportunidadesGanadas)
                 ->description('$'.number_format($montoGanado, 0, ',', '.'))
-                ->descriptionIcon('heroicon-m-arrow-trending-up')
+                ->descriptionIcon('heroicon-m-trophy')
                 ->color('success'),
 
             Stat::make('Pagos pendientes', $pagosPendientes)
@@ -101,7 +85,7 @@ class KpiStatsWidget extends StatsOverviewWidget
                 ->url(route('filament.admin.resources.payment-requests.index')),
 
             Stat::make('Clientes', $totalClientes)
-                ->description(' Registrados en el sistema')
+                ->description('Registrados en el sistema')
                 ->descriptionIcon('heroicon-m-users')
                 ->color('primary')
                 ->url(route('filament.admin.resources.clientes.index')),

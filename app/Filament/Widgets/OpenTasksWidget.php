@@ -16,18 +16,10 @@ class OpenTasksWidget extends TableWidget
 
     public function table(Table $table): Table
     {
-        $user = auth()->user();
-
         return $table
-            ->query(function () use ($user) {
-                return Task::query()
-                    ->whereIn('estado', ['Nuevo', 'En Proceso'])
-                    ->where(function ($q) use ($user) {
-                        $q->where('usuario_solicita_id', $user->id)
-                            ->orWhere('asignado_a_id', $user->id);
-                    });
-            })
-
+            ->query(
+                Task::query()->whereIn('estado', ['Nuevo', 'En Proceso'])
+            )
             ->columns([
                 TextColumn::make('titulo')->label('Tarea'),
                 TextColumn::make('estado')->badge(),

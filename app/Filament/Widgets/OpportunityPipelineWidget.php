@@ -22,14 +22,7 @@ class OpportunityPipelineWidget extends ChartWidget
 
     protected function getData(): array
     {
-        $user = auth()->user();
-        $isAdmin = $user->role?->nombre === 'admin';
-
         $query = Opportunity::query()->abiertas();
-
-        if (! $isAdmin) {
-            $query->where('user_id', $user->id);
-        }
 
         $etapas = [
             'prospeccion' => 'Prospeccion',

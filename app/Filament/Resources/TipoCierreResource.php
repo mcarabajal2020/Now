@@ -14,6 +14,7 @@ use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use UnitEnum;
 
 class TipoCierreResource extends Resource
 {
@@ -29,7 +30,9 @@ class TipoCierreResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::ExclamationTriangle;
 
-    protected static ?int $navigationSort = 11;
+    protected static ?int $navigationSort = 4;
+
+    protected static string|UnitEnum|null $navigationGroup = 'Configuracion';
 
     protected static function getPermissionKey(): string
     {

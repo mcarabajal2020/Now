@@ -27,9 +27,6 @@ class PaymentCashTotalWidget extends Widget
 
     public function calcularTotal(): void
     {
-        $user = auth()->user();
-        $isAdmin = $user->role?->nombre === 'admin';
-
         if (! $this->fecha) {
             $this->totalPendiente = 0;
             $this->countPendientes = 0;
@@ -40,10 +37,6 @@ class PaymentCashTotalWidget extends Widget
         $query = PaymentRequest::query()
             ->where('fecha_pago', '<=', $this->fecha)
             ->whereNotIn('estado', ['terminado', 'cancelado']);
-
-        if (! $isAdmin) {
-            $query->where('solicitante_id', $user->id);
-        }
 
         $this->totalPendiente = (float) $query->sum('monto');
         $this->countPendientes = (clone $query)->count();

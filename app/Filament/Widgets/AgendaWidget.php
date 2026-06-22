@@ -16,16 +16,9 @@ class AgendaWidget extends TableWidget
 
     public function table(Table $table): Table
     {
-        $user = auth()->user();
-        $isAdmin = $user->role?->nombre === 'admin';
-
-        $query = Actividad::query()->with(['cliente', 'oportunidad', 'user']);
-
-        if (! $isAdmin) {
-            $query->where('user_id', $user->id);
-        }
-
-        $query->where('fecha', '>=', now()->toDateString())
+        $query = Actividad::query()
+            ->with(['cliente', 'oportunidad', 'user'])
+            ->where('fecha', '>=', now()->toDateString())
             ->orderBy('fecha', 'asc')
             ->orderBy('hora_inicio', 'asc');
 
