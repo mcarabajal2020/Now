@@ -56,14 +56,14 @@ class KpiStatsWidget extends StatsOverviewWidget
         $totalClientes = Cliente::count();
 
         return [
-            Stat::make('Tickets abiertos', $tareasAbiertas)
+            Stat::make('Tareas abiertas', $tareasAbiertas)
                 ->description($tareasFinalizadasHoy.' finalizados hoy')
                 ->descriptionIcon('heroicon-m-check-circle')
                 ->color($tareasAbiertas > 0 ? 'warning' : 'success')
                 ->url(route('filament.admin.resources.tasks.index')),
 
             Stat::make('Finalizados (7d)', $tareasFinalizadasSemana)
-                ->description('Ultimos 7 dias')
+                ->description('Últimos 7 días')
                 ->descriptionIcon('heroicon-m-calendar')
                 ->color('success'),
 

@@ -38,7 +38,7 @@ class NoticiaForm
                     ->columnSpanFull(),
 
                 TextInput::make('link')
-                    ->label('Link')
+                    ->label('Enlace')
                     ->url()
                     ->maxLength(255)
                     ->columnSpanFull(),

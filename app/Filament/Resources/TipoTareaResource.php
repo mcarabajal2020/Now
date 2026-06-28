@@ -30,7 +30,7 @@ class TipoTareaResource extends Resource
 
     protected static ?int $navigationSort = 3;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Configuracion';
+    protected static string|UnitEnum|null $navigationGroup = 'Configuración';
 
     protected static function getPermissionKey(): string
     {

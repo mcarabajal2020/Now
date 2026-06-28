@@ -56,7 +56,7 @@ class PermissionResource extends Resource
                         'clientes' => 'Clientes',
                         'paymentrequests' => 'Pedidos de fondos',
                         'actividades' => 'Actividades',
-                        'areas' => 'Areas',
+                        'areas' => 'Áreas',
                         'tipo_cierres' => 'Tipos de cierre',
                         'tipo_tareas' => 'Tipos de tarea',
                     ])
@@ -89,7 +89,7 @@ class PermissionResource extends Resource
                         'clientes' => 'Clientes',
                         'paymentrequests' => 'Pedidos de fondos',
                         'actividades' => 'Actividades',
-                        'areas' => 'Areas',
+                        'areas' => 'Áreas',
                         'tipo_cierres' => 'Tipos de cierre',
                         'tipo_tareas' => 'Tipos de tarea',
                         default => $state,

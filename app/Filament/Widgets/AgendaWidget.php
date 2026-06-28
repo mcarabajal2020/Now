@@ -12,7 +12,7 @@ class AgendaWidget extends TableWidget
 {
     protected static ?int $sort = 5;
 
-    protected static ?string $heading = 'Agenda proxima';
+    protected static ?string $heading = 'Próxima agenda';
 
     public function table(Table $table): Table
     {
@@ -45,17 +45,17 @@ class AgendaWidget extends TableWidget
                     }),
 
                 TextColumn::make('titulo')
-                    ->label('Titulo')
+                    ->label('Título')
                     ->limit(30)
                     ->searchable(),
 
                 TextColumn::make('cliente.nombre_cuenta')
                     ->label('Cliente')
-                    ->placeholder('N/A'),
+                    ->placeholder('Sin cliente'),
 
                 TextColumn::make('oportunidad.nombre')
                     ->label('Oportunidad')
-                    ->placeholder('N/A'),
+                    ->placeholder('Sin oportunidad'),
             ])
             ->defaultPaginationPageOption(5)
             ->filters([])

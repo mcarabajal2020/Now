@@ -89,7 +89,7 @@ class TaskForm
                     ->searchable()
                     ->preload()
                     ->nullable()
-                    ->helperText('Asignar este ticket a un área en lugar de a una persona'),
+                    ->helperText('Asignar esta tarea a un área en lugar de a una persona'),
 
                 // -----------------
                 // Uso / tipo / prioridad

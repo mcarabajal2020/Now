@@ -25,11 +25,11 @@ class TaskResource extends Resource
 
     protected static ?string $model = Task::class;
 
-    protected static ?string $navigationLabel = 'Tickets';
+    protected static ?string $navigationLabel = 'Tareas';
 
-    protected static ?string $modelLabel = 'Ticket';
+    protected static ?string $modelLabel = 'Tarea';
 
-    protected static ?string $pluralModelLabel = 'Tickets';
+    protected static ?string $pluralModelLabel = 'Tareas';
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 

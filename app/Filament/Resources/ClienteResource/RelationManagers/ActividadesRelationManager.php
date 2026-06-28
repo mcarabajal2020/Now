@@ -32,19 +32,19 @@ class ActividadesRelationManager extends RelationManager
                 ->label('Tipo')
                 ->options([
                     'llamada' => 'Llamada',
-                    'reunion' => 'Reunion',
-                    'email' => 'Email',
+                    'reunion' => 'Reunión',
+                    'email' => 'Correo',
                 ])
                 ->required()
                 ->native(false),
 
             TextInput::make('titulo')
-                ->label('Titulo')
+                ->label('Título')
                 ->required()
                 ->maxLength(255),
 
             Textarea::make('descripcion')
-                ->label('Descripcion')
+                ->label('Descripción')
                 ->rows(3)
                 ->nullable(),
 
@@ -62,7 +62,7 @@ class ActividadesRelationManager extends RelationManager
                 ->native(false),
 
             TextInput::make('duracion_minutos')
-                ->label('Duracion (minutos)')
+                ->label('Duración (minutos)')
                 ->numeric()
                 ->nullable(),
 
@@ -95,7 +95,7 @@ class ActividadesRelationManager extends RelationManager
                     }),
 
                 TextColumn::make('titulo')
-                    ->label('Titulo')
+                    ->label('Título')
                     ->searchable()
                     ->limit(30),
 
@@ -110,7 +110,7 @@ class ActividadesRelationManager extends RelationManager
 
                 TextColumn::make('oportunidad.nombre')
                     ->label('Oportunidad')
-                    ->placeholder('N/A'),
+                    ->placeholder('Sin oportunidad'),
 
                 TextColumn::make('user.name')
                     ->label('Registrado por'),

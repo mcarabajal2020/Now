@@ -27,7 +27,7 @@ class UsersTable
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('email')
-                    ->label('Email')
+                    ->label('Correo')
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('fecha_nacimiento')->date()->label('Nacimiento')->sortable(),

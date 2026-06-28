@@ -73,7 +73,7 @@ class EditProfile extends Page implements HasForms
                 ->maxLength(255),
 
             TextInput::make('email')
-                ->label('Email')
+                ->label('Correo')
                 ->email()
                 ->required()
                 ->maxLength(255),

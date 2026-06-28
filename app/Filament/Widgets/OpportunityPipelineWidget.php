@@ -25,10 +25,10 @@ class OpportunityPipelineWidget extends ChartWidget
         $query = Opportunity::query()->abiertas();
 
         $etapas = [
-            'prospeccion' => 'Prospeccion',
-            'calificacion' => 'Calificacion',
+            'prospeccion' => 'Prospección',
+            'calificacion' => 'Calificación',
             'propuesta' => 'Propuesta',
-            'negociacion' => 'Negociacion',
+            'negociacion' => 'Negociación',
         ];
 
         $labels = [];

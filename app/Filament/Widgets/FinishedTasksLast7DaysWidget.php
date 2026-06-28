@@ -12,7 +12,7 @@ class FinishedTasksLast7DaysWidget extends TableWidget
 {
     protected static ?int $sort = 2;
 
-    protected static ?string $heading = 'Tareas Finalizadas Ultimos 7 Dias';
+    protected static ?string $heading = 'Tareas Finalizadas Últimos 7 Días';
 
     public function table(Table $table): Table
     {
@@ -24,7 +24,7 @@ class FinishedTasksLast7DaysWidget extends TableWidget
             )
             ->columns([
                 TextColumn::make('titulo')->label('Tarea'),
-                TextColumn::make('fecha_finalizacion')->dateTime()->label('Finalizacion'),
+                TextColumn::make('fecha_finalizacion')->dateTime()->label('Finalización'),
             ])
             ->defaultPaginationPageOption(5)
             ->filters([])

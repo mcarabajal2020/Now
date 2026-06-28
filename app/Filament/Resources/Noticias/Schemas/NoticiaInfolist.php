@@ -31,10 +31,10 @@ class NoticiaInfolist
                             ->columnSpanFull(),
 
                         TextEntry::make('link')
-                            ->label('Link')
+                            ->label('Enlace')
                             ->url(fn (?string $state): ?string => $state)
                             ->openUrlInNewTab()
-                            ->placeholder('Sin link'),
+                            ->placeholder('Sin enlace'),
                     ])
                     ->columns(2),
 

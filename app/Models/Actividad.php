@@ -53,8 +53,8 @@ class Actividad extends Model
     {
         return match ($this->tipo) {
             'llamada' => 'Llamada',
-            'reunion' => 'Reunion',
-            'email' => 'Email',
+            'reunion' => 'Reunión',
+            'email' => 'Correo',
             default => $this->tipo,
         };
     }

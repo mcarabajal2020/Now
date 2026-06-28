@@ -43,10 +43,10 @@ class ViewOpportunity extends ViewRecord
                                 TextEntry::make('origen')
                                     ->label('Origen')
                                     ->formatStateUsing(fn (string $state): string => match ($state) {
-                                        'web' => 'Web',
+                                        'web' => 'Sitio web',
                                         'referido' => 'Referido',
                                         'llamada_fria' => 'Llamada en frío',
-                                        'email' => 'Email',
+                                        'email' => 'Correo',
                                         'evento' => 'Evento/Feria',
                                         'redes_sociales' => 'Redes sociales',
                                         'otro' => 'Otro',

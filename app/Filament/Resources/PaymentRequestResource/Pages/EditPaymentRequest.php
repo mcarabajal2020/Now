@@ -13,6 +13,16 @@ class EditPaymentRequest extends EditRecord
 {
     protected static string $resource = PaymentRequestResource::class;
 
+    protected function getSaveFormAction(): Action
+    {
+        return parent::getSaveFormAction()->label('Grabar');
+    }
+
+    protected function getCancelFormAction(): Action
+    {
+        return parent::getCancelFormAction()->label('Cancelar');
+    }
+
     protected function mutateFormDataBeforeSave(array $data): array
     {
         if (PaymentRequestResource::canUpdateRequestDetails($this->record)) {

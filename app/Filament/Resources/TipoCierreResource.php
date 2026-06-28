@@ -32,7 +32,7 @@ class TipoCierreResource extends Resource
 
     protected static ?int $navigationSort = 4;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Configuracion';
+    protected static string|UnitEnum|null $navigationGroup = 'Configuración';
 
     protected static function getPermissionKey(): string
     {

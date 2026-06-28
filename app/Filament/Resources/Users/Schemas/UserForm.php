@@ -5,7 +5,6 @@ namespace App\Filament\Resources\Users\Schemas;
 use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
-use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Grid;
@@ -15,14 +14,14 @@ use Filament\Schemas\Schema;
 class UserForm
 {
     private static array $recursos = [
-        'tasks' => 'Tickets',
+        'tasks' => 'Tareas',
         'noticias' => 'Noticias',
         'users' => 'Usuarios',
         'oportunidades' => 'Oportunidades',
         'clientes' => 'Clientes',
         'paymentrequests' => 'Pedidos de fondos',
         'actividades' => 'Actividades',
-        'areas' => 'Areas',
+        'areas' => 'Áreas',
         'tipo_tareas' => 'Tipos de tarea',
         'tipo_cierres' => 'Tipos de cierre',
     ];
@@ -46,7 +45,7 @@ class UserForm
                     ->maxLength(255),
 
                 TextInput::make('email')
-                    ->label('Email')
+                    ->label('Correo')
                     ->required()
                     ->email()
                     ->maxLength(255),
@@ -57,12 +56,12 @@ class UserForm
                     ->maxDate(now()),
 
                 CheckboxList::make('areas')
-                    ->label('Areas')
+                    ->label('Áreas')
                     ->relationship('areas', 'nombre')
                     ->searchable(),
 
                 TextInput::make('password')
-                    ->label('Password')
+                    ->label('Contraseña')
                     ->password()
                     ->nullable()
                     ->maxLength(255)

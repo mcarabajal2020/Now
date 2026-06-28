@@ -13,6 +13,21 @@ class CreateNoticia extends CreateRecord
 {
     protected static string $resource = NoticiaResource::class;
 
+    protected function getCreateFormAction(): Action
+    {
+        return parent::getCreateFormAction()->label('Grabar');
+    }
+
+    protected function getCreateAnotherFormAction(): Action
+    {
+        return parent::getCreateAnotherFormAction()->label('Grabar y crear otro');
+    }
+
+    protected function getCancelFormAction(): Action
+    {
+        return parent::getCancelFormAction()->label('Cancelar');
+    }
+
     protected function mutateFormDataBeforeCreate(array $data): array
     {
         $user = auth()->user();

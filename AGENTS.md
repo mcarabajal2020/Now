@@ -32,6 +32,12 @@ This project has domain-specific skills available in `**/skills/**`. You MUST ac
 - Use descriptive names for variables and methods. For example, `isRegisteredForDiscounts`, not `discount()`.
 - Check for existing components to reuse before writing a new one.
 
+## Language
+
+- **ALL user-facing text MUST be in Spanish.** This includes: navigation labels, model labels, form labels, table column labels, button labels, filter labels, badge labels, modal headings, descriptions, placeholder text, helper text, notification messages, error messages, and seed data.
+- Never use English words in the UI (e.g., use `Correo` instead of `Email`, `Contraseña` instead of `Password`, `Tareas` instead of `Tickets`, `Etiquetas` instead of `Tags`, `Enlace` instead of `Link`).
+- Always use proper Spanish accents: `Configuración` not `Configuracion`, `Título` not `Titulo`, `Reunión` not `Reunion`, `Descripción` not `Descripcion`, `Duración` not `Duracion`.
+
 ## Verification Scripts
 
 - Do not create verification scripts or tinker when tests cover that functionality and prove they work. Unit and feature tests are more important.

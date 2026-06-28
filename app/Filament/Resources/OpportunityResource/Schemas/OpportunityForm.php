@@ -81,10 +81,10 @@ class OpportunityForm
                 Select::make('origen')
                     ->label('Origen')
                     ->options([
-                        'web' => 'Web',
+                        'web' => 'Sitio web',
                         'referido' => 'Referido',
                         'llamada_fria' => 'Llamada en frío',
-                        'email' => 'Email',
+                        'email' => 'Correo',
                         'evento' => 'Evento/Feria',
                         'redes_sociales' => 'Redes sociales',
                         'otro' => 'Otro',

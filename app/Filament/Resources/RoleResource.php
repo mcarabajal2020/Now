@@ -35,7 +35,7 @@ class RoleResource extends Resource
 
     protected static ?int $navigationSort = 6;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Configuracion';
+    protected static string|UnitEnum|null $navigationGroup = 'Configuración';
 
     protected static ?string $navigationParentItem = null;
 

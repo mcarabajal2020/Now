@@ -49,7 +49,7 @@ class PermissionSeeder extends Seeder
 
         $viewer = Role::firstOrCreate(
             ['nombre' => 'viewer'],
-            ['descripcion' => 'Viewer solo puede ver recursos']
+            ['descripcion' => 'Visualizador solo puede ver recursos']
         );
 
         $admin->permissions()->sync(Permission::all());

@@ -49,19 +49,19 @@ class ActividadResource extends Resource
                 ->label('Tipo')
                 ->options([
                     'llamada' => 'Llamada',
-                    'reunion' => 'Reunion',
-                    'email' => 'Email',
+                    'reunion' => 'Reunión',
+                    'email' => 'Correo',
                 ])
                 ->required()
                 ->native(false),
 
             TextInput::make('titulo')
-                ->label('Titulo')
+                ->label('Título')
                 ->required()
                 ->maxLength(255),
 
             Textarea::make('descripcion')
-                ->label('Descripcion')
+                ->label('Descripción')
                 ->rows(3)
                 ->nullable(),
 
@@ -79,7 +79,7 @@ class ActividadResource extends Resource
                 ->native(false),
 
             TextInput::make('duracion_minutos')
-                ->label('Duracion (minutos)')
+                ->label('Duración (minutos)')
                 ->numeric()
                 ->nullable(),
 
@@ -119,7 +119,7 @@ class ActividadResource extends Resource
                     }),
 
                 TextColumn::make('titulo')
-                    ->label('Titulo')
+                    ->label('Título')
                     ->searchable()
                     ->limit(40),
 
@@ -157,8 +157,8 @@ class ActividadResource extends Resource
                     ->label('Tipo')
                     ->options([
                         'llamada' => 'Llamada',
-                        'reunion' => 'Reunion',
-                        'email' => 'Email',
+                        'reunion' => 'Reunión',
+                        'email' => 'Correo',
                     ]),
             ])
             ->recordActions([

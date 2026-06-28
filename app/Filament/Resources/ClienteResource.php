@@ -7,7 +7,9 @@ use App\Filament\Resources\ClienteResource\RelationManagers\ActividadesRelationM
 use App\Filament\Resources\ClienteResource\RelationManagers\CbusRelationManager;
 use App\Filament\Resources\Tasks\TaskResource;
 use App\Filament\Traits\AuthorizedResource;
+use App\Models\Actividad;
 use App\Models\Cliente;
+use App\Models\Opportunity;
 use App\Models\PaymentRequest;
 use App\Models\Task;
 use BackedEnum;
@@ -68,9 +70,9 @@ class ClienteResource extends Resource
                 //   ->helperText('Separá los tags por coma. Ej: EXTERNO1, EXTERNO2')
                 //   ->maxLength(2000),
 
-                // Tags son solo referencia externa; no se enganchan a ninguna otra entidad.
+                // Etiquetas son solo referencia externa; no se enganchan a ninguna otra entidad.
                 TextInput::make('tags')
-                    ->label('Tags')
+                    ->label('Etiquetas')
                     ->placeholder('Ej: ABC,XYZ,OTRO')
                     ->helperText('Separar por coma. Se guardan como lista JSON.')
                     ->columnSpanFull()
@@ -102,13 +104,13 @@ class ClienteResource extends Resource
                 TextColumn::make('numero_cuenta')->label('Número de cuenta')->searchable(),
                 TextColumn::make('nombre_cuenta')->label('Nombre de cuenta')->searchable(),
                 TextColumn::make('tags')
-                    ->label('Tags')
+                    ->label('Etiquetas')
                     ->formatStateUsing(fn ($state) => is_array($state) ? implode(', ', $state) : ($state ? (string) $state : null))
                     ->toggleable(),
             ])
             ->filters([
                 SelectFilter::make('tag')
-                    ->label('Filtrar por tag')
+                    ->label('Filtrar por etiqueta')
                     ->options(fn () => Cliente::query()
                         ->whereNotNull('tags')
                         ->get()
@@ -165,6 +167,40 @@ class ClienteResource extends Resource
                                                 'fecha' => $p->fecha_pago ?? $p->created_at,
                                                 'importe_pagado' => $p->total_pagado ?? $p->monto ?? null,
                                                 'url' => PaymentRequestResource::getUrl('view', ['record' => $p->id]),
+                                            ]),
+                                        ])->render()),
+                                    ]),
+
+                                SchemaTab::make('oportunidades')
+                                    ->label('Oportunidades')
+                                    ->schema([
+                                        SchemaHtml::make(fn () => view('filament.pages.historial-tabs-oportunidades', [
+                                            'oportunidades' => Opportunity::query()->where('cliente_id', request()->route('record') ?? null)->orderByDesc('created_at')->get()->map(fn ($o) => [
+                                                'id' => $o->id,
+                                                'nombre' => $o->nombre,
+                                                'descripcion' => $o->descripcion,
+                                                'etapa' => $o->etapa,
+                                                'etapa_label' => $o->getEtapaLabel(),
+                                                'monto' => $o->monto_estimado,
+                                                'fecha' => $o->fecha_esperada_cierre ?? $o->created_at,
+                                                'url' => OpportunityResource::getUrl('edit', ['record' => $o->id]),
+                                            ]),
+                                        ])->render()),
+                                    ]),
+
+                                SchemaTab::make('actividades')
+                                    ->label('Actividades')
+                                    ->schema([
+                                        SchemaHtml::make(fn () => view('filament.pages.historial-tabs-actividades', [
+                                            'actividades' => Actividad::query()->where('cliente_id', request()->route('record') ?? null)->orderByDesc('fecha')->orderByDesc('hora_inicio')->get()->map(fn ($a) => [
+                                                'id' => $a->id,
+                                                'titulo' => $a->titulo,
+                                                'descripcion' => $a->descripcion,
+                                                'tipo' => $a->tipo,
+                                                'resultado' => $a->resultado,
+                                                'fecha' => $a->fecha,
+                                                'oportunidad_nombre' => $a->oportunidad?->nombre,
+                                                'url' => ActividadResource::getUrl('edit', ['record' => $a->id]),
                                             ]),
                                         ])->render()),
                                     ]),

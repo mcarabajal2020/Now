@@ -1,168 +1,137 @@
+# CRM - Tareas, Clientes y Oportunidades
 
+Sistema de gestión comercial y de tareas desarrollado con **Laravel 13** y **Filament v5**. Interfaz completamente en español.
 
-## Acerca de la Aplicación
+## Módulos
 
-**Tareas y Noticias** es una aplicación web desarrollada con Laravel 13 que permite la gestión de tareas y noticias con un sistema completo de roles y permisos.
+- **Dashboard**: Panel de control con KPIs, pipeline de oportunidades, agenda y tareas
+- **Tickets**: Gestión de tareas/tickets con estados (Nuevo, En Proceso, Finalizado, Cerrado, Rechazado)
+- **Oportunidades**: Funnel de ventas tipo Kanban con etapas (Prospección → Calificación → Propuesta → Negociación → Ganada/Perdida)
+- **Actividades/Agenda**: Registro de llamadas, reuniones y emails vinculados a clientes y oportunidades
+- **Clientes**: Directorio de clientes con gestión de CBU y alias de facturación
+- **Pedidos de fondos**: Solicitudes de pago con estados y seguimiento
+- **Noticias**: Publicación de novedades internas
+- **Usuarios**: Gestión de usuarios con permisos granulares por recurso
+- **Áreas**: Organización de áreas de trabajo
+- **Tipos de tareas** y **Tipos de cierre**: Catálogos de clasificación
 
-### Características principales
+## Permisos
 
-- **Gestión de Tareas**: Crear, editar, visualizar y eliminar tareas con seguimiento de estado
-- **Gestión de Noticias**: Publicar y gestionar noticias en la plataforma
-- **Sistema de Roles y Permisos**: Control granular de acceso basado en roles (Admin, Editor, Viewer)
-- **Panel de Administración**: Interfaz administrativa con Filament v5
-- **Excepciones de Permisos**: Permitir excepciones individuales a permisos por rol
-- **Perfil de Usuario**: Cada usuario puede editar su perfil personal
-- **Notificaciones**: Sistema de notificaciones en base de datos
+Sistema de permisos uniforme cubriendo todas las acciones (ver, editar) sobre cada recurso:
 
-## Requisitos del Sistema
+| Recurso | Ver | Editar | Oculto |
+|---|---|---|---|
+| Tickets | ✓ | ✓ | ✓ |
+| Noticias | ✓ | ✓ | ✓ |
+| Oportunidades | ✓ | ✓ | ✓ |
+| Clientes | ✓ | ✓ | ✓ |
+| Pedidos de fondos | ✓ | ✓ | ✓ |
+| Usuarios | ✓ | ✓ | ✓ |
+| Áreas | ✓ | ✓ | ✓ |
+| Tipos de tareas | ✓ | ✓ | ✓ |
+| Tipos de cierre | ✓ | ✓ | ✓ |
+| Roles | ✓ | ✓ | ✓ |
+| Permisos | ✓ | ✓ | ✓ |
+| Actividades | ✓ | ✓ | ✓ |
+| Dashboard | ✓ | — | — |
 
-- **PHP 8.4** (requerido)
-- **Composer** (para gestión de dependencias)
-- **Node.js** (para compilar assets con Vite)
-- **SQLite** o **MySQL** (recomendado para producción)
+Los permisos se asignan directamente desde el formulario de creación/edición de cada usuario (3 columnas de checkboxes: Puede ver, Puede editar, Oculto). Roles y permisos están disponibles pero ocultos del menú de navegación.
+
+## Requisitos
+
+- PHP 8.4
+- Composer
+- Node.js
+- SQLite o MySQL
 
 ## Instalación
 
-### 1. Clonar el repositorio
-
 ```bash
+# 1. Clonar
 git clone https://github.com/mcarabajal2020/Now
 cd Tareas
-```
 
-### 2. Instalar dependencias de PHP
-
-```bash
+# 2. Dependencias PHP
 composer install
-```
 
-### 3. Configurar el archivo de entorno
-
-```bash
+# 3. Entorno
 cp .env.example .env
-```
-
-Edita el archivo `.env` y configura tu base de datos:
-
-```env
-DB_CONNECTION=sqlite
-# O para MySQL:
-# DB_CONNECTION=mysql
-# DB_HOST=127.0.0.1
-# DB_PORT=3306
-# DB_DATABASE=tareas
-# DB_USERNAME=root
-# DB_PASSWORD=
-```
-
-### 4. Generar clave de aplicación
-
-```bash
 php artisan key:generate
-```
 
-### 5. Ejecutar migraciones
-
-```bash
+# 4. Migraciones y seeders
 php artisan migrate
-```
-
-### 6. Ejecutar seeders (opcional pero recomendado)
-
-```bash
 php artisan db:seed
-```
 
-Esto creará usuarios de prueba:
-- **Admin**: admin@test.com / password
-- **Editor**: editor@test.com / password
-- **Viewer**: viewer@test.com / password
-
-En caso de no crearse los usuarios ejecutar de manera manual 
-
-php artisan db:seed --class=PermissionSeeder
-
-### 7. Instalar dependencias de Node.js
-
-```bash
+# 5. Dependencias JS
 npm install
-```
-
-### 8. Compilar assets
-
-Para desarrollo:
-```bash
-npm run dev
-```
-
-Para producción:
-```bash
 npm run build
+
+# 6. Servidor
+php artisan serve
 ```
 
-### 9. Iniciar el servidor
+### Seeders
+
+`php artisan db:seed` crea usuarios de prueba:
+
+| Usuario | Email | Password |
+|---|---|---|
+| Admin | admin@test.com | password |
+| Editor | editor@test.com | password |
+| Viewer | viewer@test.com | password |
+
+Si los usuarios no se crean, ejecutar manualmente:
 
 ```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+php artisan db:seed --class=PermissionSeeder
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+## Importación de clientes
 
-## Contributing
+Se puede importar clientes desde archivos `.csv` o `.xlsx` desde el recurso Clientes en Filament.
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+**Campos obligatorios por fila:**
 
-## Code of Conduct
+- `numero_cuenta` — identificador único (se usa para `updateOrCreate`)
+- `nombre_cuenta` — nombre de la cuenta
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+**Campos opcionales (para crear CBU asociado):**
 
-## Security Vulnerabilities
+- `banco` — nombre del banco
+- `cbu` — número de CBU
+- `tipo_cbu` — tipo (`c/c`, `c/a`, `cbu`, `cvu`)
+- `observaciones` — texto libre
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+**Cabecera válida:**
 
-## License
+```
+numero_cuenta,nombre_cuenta,banco,cbu,tipo_cbu,observaciones
+```
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+Pasos:
+1. Panel Filament → Clientes
+2. Clic en "Importar clientes"
+3. Seleccionar archivo `.csv` o `.xlsx`
+4. Confirmar
 
-## Importación de clientes desde Excel/CSV
+## Tecnologías
 
-La aplicación permite importar clientes desde un archivo `.csv` o `.xlsx` vía el recurso `Cliente` en el panel de Filament.
+| Componente | Versión |
+|---|---|
+| PHP | 8.4 |
+| Laravel | 13 |
+| Filament | v5 |
+| Livewire | v4 |
+| Tailwind CSS | v4 |
+| Pest (tests) | v4 |
+| Laravel Pint | v1 |
+| Laravel Boost | v2 |
 
-- Formatos aceptados: `.csv`, `.xlsx`.
-- Las cabeceras se normalizan (insensible a mayúsculas/minúsculas y espacios).
-- Campos obligatorios (por fila):
-	- `numero_cuenta` — identificador único de la cuenta (se usa para `updateOrCreate`).
-	- `nombre_cuenta` — nombre asociado a la cuenta.
-- Campos opcionales para importar CBU en la misma fila:
-	- `banco` — nombre del banco.
-	- `cbu` — número de CBU.
-	- `tipo_cbu` — tipo del CBU (ej: `c/c`, `c/a`, `cbu`, `cvu`).
-	- `observaciones` — texto libre con notas.
+## Comandos útiles
 
-
-Reglas de importación:
-- Solo se procesan las filas que contienen ambos campos obligatorios; las filas con cualquiera de estos vacíos se saltan.
-- Si `numero_cuenta` ya existe en la base de datos, se actualiza `nombre_cuenta`.
-- Si el archivo contiene las columnas opcionales `banco`, `cbu` y/o `observaciones`, la importación intentará crear el registro de CBU asociado al cliente (una fila = un CBU). Si estos campos están vacíos, no se creará CBU para esa fila.
-
-Ejemplo de cabecera válida (CSV o Excel):
-
-numero_cuenta,nombre_cuenta,banco,cbu,observaciones
-
-Pasos para usar la importación desde la UI:
-1. Ir al panel de Filament → `Clientes`.
-2. Hacer clic en `Importar clientes` (botón en la barra de herramientas).
-3. Seleccionar el archivo `.csv` o `.xlsx` con la cabecera adecuada.
-4. Confirmar; las filas válidas se importarán/actualizarán.
-
-Comandos útiles para preparar el entorno si hace falta:
 ```bash
-composer dump-autoload
-php artisan migrate
-php artisan view:clear
-php artisan config:clear
-php artisan cache:clear
+php artisan route:list           # Ver rutas registradas
+php artisan migrate:fresh --seed  # Reiniciar base de datos
+php artisan test --compact       # Ejecutar tests
+vendor/bin/pint --dirty --format agent  # Formatear código
 ```
-

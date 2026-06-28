@@ -15,7 +15,7 @@ class TestDataSeeder extends Seeder
     {
         // Crear usuarios de prueba con diferentes roles
         $admin = User::create([
-            'name' => 'Admin User',
+            'name' => 'Administrador',
             'email' => 'admin@test.com',
             'password' => bcrypt('password'),
             'role_id' => Role::where('nombre', 'admin')->first()?->id,
@@ -25,14 +25,14 @@ class TestDataSeeder extends Seeder
         ]);
 
         $editor = User::create([
-            'name' => 'Editor User',
+            'name' => 'Editor',
             'email' => 'editor@test.com',
             'password' => bcrypt('password'),
             'role_id' => Role::where('nombre', 'editor')->first()?->id,
         ]);
 
         $viewer = User::create([
-            'name' => 'Viewer User',
+            'name' => 'Visualizador',
             'email' => 'viewer@test.com',
             'password' => bcrypt('password'),
             'role_id' => Role::where('nombre', 'viewer')->first()?->id,
